@@ -1,8 +1,8 @@
 // JalDrishti Platform Master Controller & SPA Router
-import { initMap } from './map.js';
-import { initEvidencePortal } from './evidence.js';
-import { initAnalytics } from './analytics.js';
-import { initTelemetry } from './telemetry.js';
+import { initMap } from './map.js?v=2.2';
+import { initEvidencePortal } from './evidence.js?v=2.2';
+import { initAnalytics } from './analytics.js?v=2.2';
+import { initTelemetry } from './telemetry.js?v=2.2';
 
 document.addEventListener('DOMContentLoaded', () => {
   initLandingVideoScreen();
