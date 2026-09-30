@@ -12,6 +12,7 @@ let selectedSite = null;
 let sitingActive = false;
 let sitingMarker = null;
 let activeHighlightCircle = null;
+let searchLocationMarker = null;
 
 export function initMap() {
   if (mapInstance) {
@@ -124,6 +125,7 @@ export function initMap() {
   setupTemporalSlider();
   setupSitingOptimizer();
   setupCoordinateTracker();
+  setupAddressLocatorSearch();
 
   // Initialize with empty standby inspector state (only populate when user chooses data)
   clearSiteSelection();
@@ -911,3 +913,451 @@ window.zoomToSite = function(lat, lng) {
 window.saveProposedIntervention = function(lat, lng, score) {
   alert(`Proposed check dam site at (${lat}, ${lng}) with AI Suitability Score ${score}% has been added to the District Water Conservation Master Plan!`);
 };
+
+window.triggerSitingAtCoords = function(lat, lng) {
+  if (mapInstance) {
+    mapInstance.flyTo([lat, lng], 16, { duration: 1.0 });
+  }
+  const simulatedSlope = (4 + (Math.abs(Math.sin(lat * 10)) * 12)).toFixed(1);
+  const simulatedCatchment = Math.round(80 + (Math.abs(Math.cos(lng * 8)) * 320));
+  const estimatedCapacity = Math.round(simulatedCatchment * 42.5);
+  const suitabilityScore = Math.min(98, Math.max(62, Math.round(100 - (simulatedSlope * 2.8) + (simulatedCatchment / 18))));
+
+  if (sitingMarker && mapInstance) mapInstance.removeLayer(sitingMarker);
+
+  const sitingIcon = L.divIcon({
+    className: 'custom-div-icon',
+    html: `
+      <div class="relative flex items-center justify-center animate-bounce" style="width: 40px; height: 40px;">
+        <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center border-4 border-white shadow-2xl">
+          <span class="material-symbols-outlined text-xl">add_location_alt</span>
+        </div>
+      </div>
+    `,
+    iconSize: [40, 40],
+    iconAnchor: [20, 20]
+  });
+
+  sitingMarker = L.marker([lat, lng], { icon: sitingIcon }).addTo(mapInstance);
+
+  sitingMarker.bindPopup(`
+    <div class="w-72 p-2">
+      <div class="flex justify-between items-center border-b pb-1 mb-2">
+        <span class="text-xs font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">AI SITING ANALYSIS</span>
+        <span class="text-xs font-bold text-emerald-600">${suitabilityScore}% SUITABLE</span>
+      </div>
+      <h4 class="font-bold text-sm text-gray-900">Recommended: Masonry Check-Dam</h4>
+      <div class="grid grid-cols-2 gap-2 text-xs bg-gray-50 p-2 rounded my-2">
+        <div>Slope: <b>${simulatedSlope}%</b></div>
+        <div>Catchment: <b>${simulatedCatchment} ha</b></div>
+        <div class="col-span-2">Estimated Cap: <b>${estimatedCapacity.toLocaleString()} L</b></div>
+      </div>
+      <p class="text-[11px] text-gray-600">Location satisfies drainage convergence criteria and minimal land submersion.</p>
+      <button class="w-full mt-2 py-1.5 bg-emerald-600 text-white rounded text-xs font-semibold hover:bg-emerald-700" onclick="window.saveProposedIntervention(${lat.toFixed(4)}, ${lng.toFixed(4)}, ${suitabilityScore})">
+        Save as Proposed Site
+      </button>
+    </div>
+  `).openPopup();
+};
+
+export function showCustomLocationInfo(place) {
+  const inspector = document.getElementById('site-inspector-panel');
+  if (!inspector) return;
+
+  const lat = place.lat;
+  const lng = place.lng;
+  const simulatedSlope = (3.5 + (Math.abs(Math.sin(lat * 12)) * 10)).toFixed(1);
+  const simulatedCatchment = Math.round(65 + (Math.abs(Math.cos(lng * 9)) * 280));
+  const estimatedRainfall = Math.round(650 + (Math.abs(Math.sin((lat + lng) * 5)) * 550));
+  const suitabilityScore = Math.min(96, Math.max(65, Math.round(98 - (simulatedSlope * 2.2) + (simulatedCatchment / 22))));
+
+  inspector.innerHTML = `
+    <div class="space-y-4">
+      <div class="flex items-start justify-between">
+        <div>
+          <span class="inline-block px-2 py-0.5 rounded text-data-mono font-mono text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+            📍 Located Place
+          </span>
+          <h3 class="text-lg font-bold font-headline mt-1 leading-snug text-gray-900 dark:text-white">${place.name}</h3>
+          <p class="text-xs text-gray-500">${place.subtitle || 'Geocoded Location'}</p>
+        </div>
+        <button onclick="window.clearSiteSelection()" class="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition" title="Close Details">
+          <span class="material-symbols-outlined text-base">close</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <div class="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-lg border border-gray-100 dark:border-gray-700">
+          <div class="text-gray-500">AI Siting Potential</div>
+          <div class="text-xl font-bold font-mono text-emerald-600 mt-1">${suitabilityScore}%</div>
+          <div class="text-[10px] text-emerald-600 mt-0.5">High Potential</div>
+        </div>
+        <div class="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-lg border border-gray-100 dark:border-gray-700">
+          <div class="text-gray-500">Terrain Slope</div>
+          <div class="text-xl font-bold font-mono text-blue-600 mt-1">${simulatedSlope}%</div>
+          <div class="text-[10px] text-gray-500 mt-0.5">Gentle to Moderate</div>
+        </div>
+        <div class="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-lg border border-gray-100 dark:border-gray-700">
+          <div class="text-gray-500">Catchment Area</div>
+          <div class="text-lg font-bold font-mono text-gray-900 dark:text-white mt-1">${simulatedCatchment} ha</div>
+          <div class="text-[10px] text-gray-500 mt-0.5">Micro-Catchment</div>
+        </div>
+        <div class="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-lg border border-gray-100 dark:border-gray-700">
+          <div class="text-gray-500">Est. Rainfall</div>
+          <div class="text-lg font-bold font-mono text-cyan-600 mt-1">${estimatedRainfall} mm</div>
+          <div class="text-[10px] text-gray-500 mt-0.5">Monsoon Seasonal</div>
+        </div>
+      </div>
+
+      <div class="text-xs space-y-2 border-t pt-3 border-gray-100 dark:border-gray-800">
+        <div class="flex justify-between"><span class="text-gray-500">Coordinates:</span> <span class="font-mono text-emerald-600 dark:text-emerald-400 font-semibold">${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Drainage Zone:</span> <span class="font-medium">Krishna-Bhima Catchment</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Soil Permeability:</span> <span class="font-medium">Medium-High (Clayey Loam)</span></div>
+      </div>
+
+      <div class="flex flex-col gap-2 pt-2">
+        <button class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 shadow" onclick="window.triggerSitingAtCoords(${lat}, ${lng})">
+          <span class="material-symbols-outlined text-sm">architecture</span>
+          Run AI Siting Analysis Here
+        </button>
+        <button class="w-full py-1.5 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-xs text-gray-700 dark:text-gray-300 font-medium transition" onclick="window.zoomToSite(${lat}, ${lng})">
+          Center & Zoom Closer
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function setupAddressLocatorSearch() {
+  const searchInput = document.getElementById('map-address-search-input');
+  const clearBtn = document.getElementById('btn-clear-address-search');
+  const resultsDropdown = document.getElementById('map-address-results-dropdown');
+
+  if (!searchInput || !resultsDropdown) return;
+
+  const PRESET_PLACES = [
+    { name: "Saswad", subtitle: "Purandar Taluka, Pune (Karha Catchment)", lat: 18.3444, lng: 74.0309, type: "watershed_hub" },
+    { name: "Wai", subtitle: "Satara District (Upper Krishna Basin)", lat: 17.9482, lng: 73.8911, type: "watershed_hub" },
+    { name: "Parner Uplands", subtitle: "Ahmednagar District (Rain-Shadow Zone)", lat: 19.0012, lng: 74.4421, type: "watershed_hub" },
+    { name: "Satara", subtitle: "Western Ghats Foothills, Maharashtra", lat: 17.6805, lng: 73.9930, type: "district" },
+    { name: "Pune", subtitle: "Mula-Mutha & Upper Bhima Catchment", lat: 18.5204, lng: 73.8567, type: "district" },
+    { name: "Dhom Reservoir", subtitle: "Wai, Satara (Krishna Tributary)", lat: 17.9833, lng: 73.8167, type: "reservoir" },
+    { name: "Bavdhan Hills", subtitle: "Pune Sub-catchment Zone", lat: 18.5158, lng: 73.7719, type: "village" },
+    { name: "Jejuri", subtitle: "Purandar, Pune (Karha River Basin)", lat: 18.2757, lng: 74.1565, type: "village" },
+    { name: "Shirwal", subtitle: "Khandala, Satara (Nira Basin)", lat: 18.1360, lng: 73.9856, type: "village" },
+    { name: "Velhe", subtitle: "Torna Catchment, Gunjawani Basin", lat: 18.2933, lng: 73.6339, type: "village" },
+    { name: "Bhor", subtitle: "Bhatghar Reservoir Valley, Pune", lat: 18.1481, lng: 73.8443, type: "village" },
+    { name: "Baramati", subtitle: "Nira Left Bank Agricultural Basin", lat: 18.1517, lng: 74.5772, type: "watershed_hub" },
+    { name: "Ahmednagar", subtitle: "Sina River Basin, Maharashtra", lat: 19.0948, lng: 74.7480, type: "district" },
+    { name: "Khadakwasla Catchment", subtitle: "Mutha River Basin, Pune", lat: 18.4411, lng: 73.7628, type: "reservoir" },
+    { name: "Panshet Dam Valley", subtitle: "Ambi River Sub-basin, Velhe", lat: 18.4069, lng: 73.6186, type: "reservoir" },
+    { name: "Mahabaleshwar", subtitle: "Krishna River Source / Ridge Headwaters", lat: 17.9237, lng: 73.6586, type: "watershed_hub" }
+  ];
+
+  let debounceTimer = null;
+  let activeIndex = -1;
+  let currentResults = [];
+
+  const selectPlace = (place) => {
+    searchInput.value = place.name;
+    if (clearBtn) clearBtn.classList.remove('hidden');
+    resultsDropdown.classList.add('hidden');
+    resultsDropdown.innerHTML = '';
+
+    if (!mapInstance) return;
+
+    mapInstance.flyTo([place.lat, place.lng], 15, {
+      duration: 1.4,
+      easeLinearity: 0.25
+    });
+
+    if (searchLocationMarker && mapInstance) {
+      mapInstance.removeLayer(searchLocationMarker);
+    }
+
+    const pinIcon = L.divIcon({
+      className: 'custom-search-pin',
+      html: `
+        <div class="relative flex items-center justify-center" style="width: 44px; height: 44px;">
+          <div class="absolute w-11 h-11 rounded-full bg-emerald-500/30 animate-ping"></div>
+          <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-400 text-white flex items-center justify-center border-2 border-white shadow-2xl z-10">
+            <span class="material-symbols-outlined text-lg">location_on</span>
+          </div>
+        </div>
+      `,
+      iconSize: [44, 44],
+      iconAnchor: [22, 22]
+    });
+
+    searchLocationMarker = L.marker([place.lat, place.lng], { icon: pinIcon }).addTo(mapInstance);
+
+    const lat = place.lat;
+    const lng = place.lng;
+    const simulatedSlope = (3.5 + (Math.abs(Math.sin(lat * 12)) * 10)).toFixed(1);
+    const simulatedCatchment = Math.round(65 + (Math.abs(Math.cos(lng * 9)) * 280));
+    const suitabilityScore = Math.min(96, Math.max(65, Math.round(98 - (simulatedSlope * 2.2) + (simulatedCatchment / 22))));
+
+    searchLocationMarker.bindPopup(`
+      <div class="w-72 p-1.5 font-sans">
+        <div class="flex items-center justify-between border-b pb-1.5 mb-2">
+          <span class="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded flex items-center gap-1">
+            <span class="material-symbols-outlined text-xs">pin_drop</span> LOCATED PLACE
+          </span>
+          <span class="text-xs font-mono font-bold text-gray-500">${lat.toFixed(4)}°, ${lng.toFixed(4)}°</span>
+        </div>
+        <h4 class="font-bold text-sm text-gray-900 dark:text-white leading-tight">${place.name}</h4>
+        <p class="text-xs text-gray-500 mt-0.5">${place.subtitle || 'Geocoded Address'}</p>
+        
+        <div class="grid grid-cols-2 gap-1.5 bg-gray-50 dark:bg-gray-800/70 p-2 rounded-lg my-2.5 text-xs">
+          <div><span class="text-gray-400">Slope:</span> <b>${simulatedSlope}%</b></div>
+          <div><span class="text-gray-400">Catchment:</span> <b>${simulatedCatchment} ha</b></div>
+          <div class="col-span-2 flex items-center justify-between pt-1 border-t border-gray-200 dark:border-gray-700 text-emerald-600 font-semibold">
+            <span>AI Suitability:</span>
+            <span>${suitabilityScore}% High</span>
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <button class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 shadow transition" onclick="window.triggerSitingAtCoords(${lat}, ${lng})">
+            <span class="material-symbols-outlined text-sm">architecture</span>
+            Run AI Siting Analysis
+          </button>
+        </div>
+      </div>
+    `, { offset: [0, -10] }).openPopup();
+
+    if (activeHighlightCircle && mapInstance) {
+      mapInstance.removeLayer(activeHighlightCircle);
+    }
+    activeHighlightCircle = L.circleMarker([place.lat, place.lng], {
+      radius: 32,
+      color: '#059669',
+      weight: 3,
+      fillColor: '#10b981',
+      fillOpacity: 0.25
+    }).addTo(mapInstance);
+
+    setTimeout(() => {
+      if (activeHighlightCircle && mapInstance) {
+        mapInstance.removeLayer(activeHighlightCircle);
+        activeHighlightCircle = null;
+      }
+    }, 4000);
+
+    showLocationHUDToast({
+      name: place.name,
+      lat: place.lat,
+      lng: place.lng,
+      placeInfo: {
+        village: place.name.split(',')[0],
+        taluka: place.subtitle ? place.subtitle.split(',')[0] : 'Catchment Area',
+        district: place.subtitle && place.subtitle.includes('Satara') ? 'Satara' : (place.subtitle && place.subtitle.includes('Ahmednagar') ? 'Ahmednagar' : 'Pune')
+      }
+    });
+
+    showCustomLocationInfo(place);
+  };
+
+  const renderDropdown = (items) => {
+    currentResults = items;
+    activeIndex = -1;
+
+    if (!items || items.length === 0) {
+      resultsDropdown.innerHTML = `
+        <div class="p-3 text-center text-gray-400 text-xs">
+          No matching places found. Try entering district, village or road name.
+        </div>
+      `;
+      resultsDropdown.classList.remove('hidden');
+      return;
+    }
+
+    resultsDropdown.innerHTML = items.map((item, idx) => `
+      <div 
+        class="address-search-item px-3.5 py-2.5 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 cursor-pointer flex items-start gap-2.5 transition ${idx === activeIndex ? 'bg-emerald-50 dark:bg-emerald-950/50' : ''}" 
+        data-index="${idx}"
+      >
+        <span class="material-symbols-outlined text-emerald-600 text-base mt-0.5 shrink-0">
+          ${item.type === 'checkdam' ? 'water_drop' : item.type === 'basin' ? 'public' : item.type === 'reservoir' ? 'waves' : 'location_on'}
+        </span>
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-gray-900 dark:text-white truncate">${item.name}</div>
+          <div class="text-[11px] text-gray-500 dark:text-gray-400 truncate">${item.subtitle || ''}</div>
+        </div>
+        <span class="font-mono text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded border border-emerald-200/50 shrink-0">
+          ${item.lat.toFixed(2)}°, ${item.lng.toFixed(2)}°
+        </span>
+      </div>
+    `).join('');
+
+    resultsDropdown.querySelectorAll('.address-search-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const idx = parseInt(el.getAttribute('data-index'));
+        if (currentResults[idx]) {
+          selectPlace(currentResults[idx]);
+        }
+      });
+    });
+
+    resultsDropdown.classList.remove('hidden');
+  };
+
+  const executeSearch = (rawQuery) => {
+    const query = rawQuery.trim().toLowerCase();
+    if (!query) {
+      resultsDropdown.classList.add('hidden');
+      resultsDropdown.innerHTML = '';
+      return;
+    }
+
+    // 1. Search in Check Dam Sites
+    const damMatches = CHECK_DAM_SITES.filter(d => 
+      d.name.toLowerCase().includes(query) || 
+      (d.basinName && d.basinName.toLowerCase().includes(query)) ||
+      (d.placeInfo && (d.placeInfo.village.toLowerCase().includes(query) || d.placeInfo.district.toLowerCase().includes(query)))
+    ).map(d => ({
+      name: d.name,
+      subtitle: d.placeInfo ? `${d.placeInfo.village}, ${d.placeInfo.taluka} (${d.basinName || d.basinId})` : `${d.basinId} Check Dam`,
+      lat: d.lat,
+      lng: d.lng,
+      type: 'checkdam',
+      rawSite: d
+    }));
+
+    // 2. Search in Watershed Basins
+    const basinMatches = (WATERSHED_BASINS.features || []).filter(f => 
+      f.properties.name.toLowerCase().includes(query) || 
+      f.properties.id.toLowerCase().includes(query) ||
+      (f.properties.district && f.properties.district.toLowerCase().includes(query))
+    ).map(f => {
+      const coords = f.geometry.coordinates[0];
+      const avgLat = coords.reduce((acc, c) => acc + c[1], 0) / coords.length;
+      const avgLng = coords.reduce((acc, c) => acc + c[0], 0) / coords.length;
+      return {
+        name: f.properties.name,
+        subtitle: `${f.properties.taluka}, ${f.properties.district} Basin (${f.properties.area_sqkm} km²)`,
+        lat: avgLat,
+        lng: avgLng,
+        type: 'basin'
+      };
+    });
+
+    // 3. Search in Local Preset Places
+    const presetMatches = PRESET_PLACES.filter(p => 
+      p.name.toLowerCase().includes(query) || 
+      p.subtitle.toLowerCase().includes(query)
+    );
+
+    const combinedLocal = [...damMatches, ...presetMatches, ...basinMatches];
+
+    const uniqueLocal = [];
+    const seen = new Set();
+    combinedLocal.forEach(item => {
+      const key = `${item.name}-${item.lat.toFixed(3)}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueLocal.push(item);
+      }
+    });
+
+    renderDropdown(uniqueLocal.slice(0, 6));
+
+    if (query.length >= 3) {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(rawQuery)}&addressdetails=1&limit=5`, {
+          headers: { 'Accept-Language': 'en' }
+        })
+        .then(res => res.json())
+        .then(apiData => {
+          if (Array.isArray(apiData) && apiData.length > 0) {
+            const apiResults = apiData.map(item => ({
+              name: item.name || item.display_name.split(',')[0],
+              subtitle: item.display_name,
+              lat: parseFloat(item.lat),
+              lng: parseFloat(item.lon),
+              type: 'nominatim'
+            }));
+
+            const merged = [...uniqueLocal];
+            apiResults.forEach(r => {
+              if (!merged.some(m => Math.abs(m.lat - r.lat) < 0.01 && Math.abs(m.lng - r.lng) < 0.01)) {
+                merged.push(r);
+              }
+            });
+
+            renderDropdown(merged.slice(0, 7));
+          }
+        })
+        .catch(err => {
+          console.warn('Geocoding search notice:', err);
+        });
+      }, 350);
+    }
+  };
+
+  searchInput.addEventListener('input', (e) => {
+    const val = e.target.value;
+    if (clearBtn) {
+      if (val.length > 0) clearBtn.classList.remove('hidden');
+      else clearBtn.classList.add('hidden');
+    }
+    executeSearch(val);
+  });
+
+  searchInput.addEventListener('focus', () => {
+    if (searchInput.value.trim().length > 0) {
+      executeSearch(searchInput.value);
+    } else {
+      renderDropdown(PRESET_PLACES.slice(0, 6));
+    }
+  });
+
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (currentResults.length > 0) {
+        activeIndex = (activeIndex + 1) % currentResults.length;
+        renderDropdown(currentResults);
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (currentResults.length > 0) {
+        activeIndex = (activeIndex - 1 + currentResults.length) % currentResults.length;
+        renderDropdown(currentResults);
+      }
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (activeIndex >= 0 && currentResults[activeIndex]) {
+        selectPlace(currentResults[activeIndex]);
+      } else if (currentResults.length > 0) {
+        selectPlace(currentResults[0]);
+      }
+    } else if (e.key === 'Escape') {
+      resultsDropdown.classList.add('hidden');
+    }
+  });
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      clearBtn.classList.add('hidden');
+      resultsDropdown.classList.add('hidden');
+      resultsDropdown.innerHTML = '';
+      if (searchLocationMarker && mapInstance) {
+        mapInstance.removeLayer(searchLocationMarker);
+        searchLocationMarker = null;
+      }
+      if (activeHighlightCircle && mapInstance) {
+        mapInstance.removeLayer(activeHighlightCircle);
+        activeHighlightCircle = null;
+      }
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!searchInput.contains(e.target) && !resultsDropdown.contains(e.target)) {
+      resultsDropdown.classList.add('hidden');
+    }
+  });
+}
