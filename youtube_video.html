@@ -151,6 +151,19 @@
       0% { background-position: -200% 0; }
       100% { background-position: 200% 0; }
     }
+    @keyframes voiceBar {
+      0% { transform: scaleY(0.4); }
+      100% { transform: scaleY(1.2); }
+    }
+    /* Typewriter cursor */
+    #narration-line::after {
+      content: '|';
+      color: #60a5fa;
+      animation: blink 0.8s step-end infinite;
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
   </style>
 </head>
 <body>
@@ -204,6 +217,18 @@
           <span class="text-red-400 font-bold tracking-wider">LIVE REC</span>
           <span id="timecode" class="text-gray-200 font-bold">00:00:00.00</span>
         </div>
+        <!-- Voice Narration Status Pill -->
+        <div id="voice-status" class="hidden items-center gap-2 px-3 py-1 rounded bg-blue-950/60 border border-blue-400/50 font-mono text-xs shadow-md">
+          <span class="material-symbols-outlined text-blue-400 text-sm" style="animation: pulse 1s infinite;">mic</span>
+          <span class="text-blue-300 font-bold">NARRATING</span>
+          <div class="flex items-end gap-0.5 h-3">
+            <div class="w-0.5 bg-blue-400 rounded-full" style="height:4px; animation: voiceBar 0.4s ease infinite alternate;"></div>
+            <div class="w-0.5 bg-blue-400 rounded-full" style="height:8px; animation: voiceBar 0.4s ease 0.1s infinite alternate;"></div>
+            <div class="w-0.5 bg-blue-400 rounded-full" style="height:5px; animation: voiceBar 0.4s ease 0.2s infinite alternate;"></div>
+            <div class="w-0.5 bg-blue-400 rounded-full" style="height:10px; animation: voiceBar 0.4s ease 0.3s infinite alternate;"></div>
+            <div class="w-0.5 bg-blue-400 rounded-full" style="height:3px; animation: voiceBar 0.4s ease 0.4s infinite alternate;"></div>
+          </div>
+        </div>
       </div>
     </div>
     
@@ -213,9 +238,14 @@
     </div>
     
     <!-- Bottom Cinematic Subtitles & Voiceover Narration Bar -->
-    <div class="absolute bottom-16 left-8 right-8 z-30 flex flex-col items-center pointer-events-none">
+    <div class="absolute bottom-16 left-8 right-8 z-30 flex flex-col items-center gap-2 pointer-events-none">
+      <!-- Narration Script Display (scrolling sentence) -->
+      <div id="narration-line-box" class="max-w-5xl w-full px-5 py-2 rounded-lg bg-blue-950/70 border border-blue-400/30 backdrop-blur-md shadow-xl text-center hidden">
+        <p id="narration-line" class="text-sm md:text-base font-medium text-blue-100 font-sans italic leading-snug"></p>
+      </div>
+      <!-- Bottom subtitle bar -->
       <div id="subtitle-box" class="max-w-4xl px-6 py-2.5 rounded-xl bg-black/85 border border-cyan-500/40 backdrop-blur-xl shadow-2xl text-center">
-        <p id="subtitle-text" class="text-base md:text-xl font-semibold tracking-wide text-cyan-100 font-sans">
+        <p id="subtitle-text" class="text-sm md:text-lg font-semibold tracking-wide text-cyan-100 font-sans">
           Initializing JalDrishti Geospatial Intelligence Engine...
         </p>
       </div>
@@ -230,6 +260,9 @@
         </button>
         <button id="btn-restart" class="p-1.5 rounded-md hover:bg-white/10 text-gray-300 transition-all active:scale-95" title="Restart Video from Beginning">
           <span class="material-symbols-outlined text-lg">replay</span>
+        </button>
+        <button id="btn-narrate" class="p-1.5 rounded-md bg-blue-500/20 hover:bg-blue-500/40 text-blue-300 transition-all active:scale-95" title="Replay narration for current scene">
+          <span class="material-symbols-outlined text-lg">record_voice_over</span>
         </button>
         <button id="btn-audio" class="p-1.5 rounded-md hover:bg-white/10 text-cyan-300 transition-all active:scale-95" title="Toggle Sound / Voiceover">
           <span id="audio-icon" class="material-symbols-outlined text-lg">volume_up</span>
@@ -417,9 +450,175 @@
         }
         return this.isMuted;
       }
+      
+      // Duck music volume while speaking, restore after
+      duckForSpeech(durationSeconds) {
+        if (!this.masterGain || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        this.masterGain.gain.setValueAtTime(0.08, now);   // duck to 25%
+        this.masterGain.gain.linearRampToValueAtTime(0.3, now + durationSeconds + 1.5); // restore after speech
+      }
     }
     
     const audio = new CinematicAudioEngine();
+
+    // =========================================================================
+    // VOICEOVER NARRATION ENGINE (Web Speech API + Typewriter Subtitles)
+    // =========================================================================
+    const voiceStatusEl = document.getElementById('voice-status');
+    const narrationLineBox = document.getElementById('narration-line-box');
+    const narrationLineEl = document.getElementById('narration-line');
+    
+    // Detailed voiceover narration scripts per scene (spoken aloud)
+    const narrationScripts = [
+      // Scene 0 — The Crisis
+      `India spends over fifteen thousand crore rupees every year building check dams and watershed structures across rural areas. But here's the shocking truth — more than forty percent of these structures fail completely. Why? Because they are placed based on guesswork and manual surveys with no scientific slope analysis, no hydrological runoff verification, and no catchment basin delineation. 
+
+Worse still — billions of rupees are lost to ghost infrastructure. Field officers submit duplicate photos, recycled images, and even AI-generated synthetic photographs to fraudulently claim milestone payment releases. Damaged check dams and silted reservoirs go undetected for sixty days or more due to massive audit backlogs in paper-based monitoring systems. India's water security is being drained — not by drought, but by broken processes.`,
+
+      // Scene 1 — JalDrishti Solution
+      `Enter JalDrishti — a comprehensive AI-powered Geospatial Intelligence Platform built to solve this crisis end to end. Developed by Team Innova8 for Smart India Hackathon 2026 under Problem Statement SIH twenty six zero three one, JalDrishti integrates four breakthrough technologies into one unified dashboard.
+
+First: Full Vector GIS Hydrology with real-time AI DEM slope analysis. Second: Multi-layer Neural AI photo forensics with cryptographic certification. Third: Autonomous Solar IoT LoRaWAN sensor mesh for live groundwater telemetry. And Fourth: Sentinel-2 Satellite five-season playback for long-term impact verification. JalDrishti's mission is simple — guard every drop of water, and verify every rupee of public fund.`,
+
+      // Scene 2 — Vector GIS & AI DEM
+      `JalDrishti's first pillar is the Vector GIS and AI Digital Elevation Model Siting Engine. Using sub-meter resolution vector tiles powered by OpenFreeMap and rendered via MapLibre GL, the system automatically delineates watershed catchment basins by computing terrain flow accumulation and slope gradient fields in real time.
+
+The AI Siting Engine applies the SCS Curve Number method — a hydrological standard used by civil engineers — to calculate the actual runoff yield a check dam would receive at any given GPS coordinate. A slope contour solver identifies the optimal three to twelve percent gradient zone for hydraulic pressure stability. In a live demonstration, the system evaluated a site in Nashik district of Maharashtra and returned a ninety four point eight percent suitability score, with a projected runoff yield of one lakh forty two thousand five hundred cubic meters per monsoon season — computed in under two seconds.`,
+
+      // Scene 3 — Neural AI Forensics
+      `JalDrishti's second pillar is its Multi-Layer Neural AI Photo Forensics engine — the industry's first cryptographic field photo verification system designed specifically for watershed infrastructure.
+
+Here's how it works: when a field officer submits a completion photo, JalDrishti runs the image through six simultaneous forensic analysis layers. The first layer analyzes the CMOS sensor Bayer Pattern noise — called Photo Response Non-Uniformity or PRNU — which is a unique fingerprint embedded in every camera's hardware. If the photo was taken by a different device than the registered field phone, it fails immediately.
+
+The second layer runs diffusion model artifact detection using a trained neural network that identifies synthetic AI-generated images with ninety four percent accuracy. The third layer cross-validates GPS coordinates embedded in EXIF metadata against the registered site location. If any of these checks fail, the system blocks the payment automatically and flags the case for investigation. Every approved submission generates a legally admissible SHA-256 cryptographic audit certificate that is tamper-proof and court-ready.`,
+
+      // Scene 4 — IoT & Satellite
+      `JalDrishti's third pillar brings autonomous real-time monitoring with solar-powered IoT micro probes and satellite earth observation. Each check dam site is equipped with a Solar Micro RTU — a Remote Telemetry Unit — that runs on a fifty watt solar panel and transmits sensor data every fifteen minutes over a LoRaWAN long-range radio mesh, with four G LTE-M as a backup gateway.
+
+The sensor array measures groundwater table depth using pressure transducers, reservoir silt accumulation using ultrasonic echo ranging, and water level using capacitance sensors. When silt exceeds the critical threshold, an automated desilting alert is pushed to the district officer's dashboard. Live telemetry data shows groundwater tables have risen an average of three point eight meters across instrumented sites.
+
+Layered on top of this ground truth data is the Sentinel-2 Multispectral Imaging Satellite playback engine. Using ten meter resolution multi-spectral bands, JalDrishti computes NDVI — Normalized Difference Vegetation Index — to track biomass recovery, and NDWI — Normalized Difference Water Index — to map surface water extent across five monsoon seasons. The before-and-after satellite comparison provides irrefutable, satellite-backed proof of impact.`,
+
+      // Scene 5 — Impact
+      `The results speak for themselves. Across pilot deployments in Maharashtra's drought-prone Marathwada region, JalDrishti delivered transformative, measurable outcomes.
+
+Water retention improved by three hundred and forty percent compared to conventionally sited check dams — directly buffering flash flood risks in downstream villages. Groundwater aquifer levels rose by three point five meters on average, recharging borewells and restoring year-round access to drinking water for over twelve thousand households.
+
+Farmer incomes increased by one hundred and forty four percent — from fifty eight thousand rupees to one lakh forty two thousand rupees per year — as two additional cropping seasons became viable with reliable irrigation. And administrative audit costs dropped by eighty two percent — from twenty thousand rupees to just twenty five hundred rupees per dam — eliminating paper trails, reducing travel, and saving crores in operational overhead.
+
+JalDrishti is not just a technology platform. It is a scalable public infrastructure system that can be deployed across every district in India, protecting the investments of fifteen thousand crore rupees and the water security of hundreds of millions of rural citizens. This is Team Innova8's vision for a smarter, more accountable India.`
+    ];
+    
+    let currentUtterance = null;
+    let narrationTypewriterInterval = null;
+    
+    function getPreferredVoice() {
+      const voices = window.speechSynthesis.getVoices();
+      // Priority order: Google US English > Microsoft Natural > Samantha > Any English
+      const preferred = [
+        v => v.name.includes('Google US English'),
+        v => v.name.includes('Google UK English Female'),
+        v => v.name.includes('Microsoft Aria') || v.name.includes('Microsoft Jenny'),
+        v => v.name.includes('Samantha') && v.lang.startsWith('en'),
+        v => v.name.includes('Karen') && v.lang.startsWith('en'),
+        v => v.lang === 'en-US',
+        v => v.lang.startsWith('en') && !v.name.includes('(zh)'),
+      ];
+      for (const test of preferred) {
+        const match = voices.find(test);
+        if (match) return match;
+      }
+      return voices[0] || null;
+    }
+    
+    function typewriterDisplay(text) {
+      if (narrationTypewriterInterval) clearInterval(narrationTypewriterInterval);
+      narrationLineEl.textContent = '';
+      narrationLineBox.classList.remove('hidden');
+      narrationLineBox.classList.add('flex');
+      
+      const sentences = text.split('. ').filter(s => s.trim());
+      let sentIdx = 0;
+      
+      function showNextSentence() {
+        if (sentIdx >= sentences.length) return;
+        const sentence = sentences[sentIdx] + (sentIdx < sentences.length - 1 ? '.' : '');
+        sentIdx++;
+        
+        // Typewriter character by character
+        let charIdx = 0;
+        narrationLineEl.textContent = '';
+        narrationTypewriterInterval = setInterval(() => {
+          if (charIdx < sentence.length) {
+            narrationLineEl.textContent += sentence[charIdx];
+            charIdx++;
+          } else {
+            clearInterval(narrationTypewriterInterval);
+            // Pause, then move to next sentence after 2.5 seconds
+            setTimeout(showNextSentence, 2500);
+          }
+        }, 28); // ~36 chars/sec
+      }
+      showNextSentence();
+    }
+    
+    function speakScene(sceneIndex) {
+      if (!('speechSynthesis' in window)) {
+        console.warn('Speech synthesis not supported');
+        return;
+      }
+      if (audio.isMuted) return;
+      
+      window.speechSynthesis.cancel();
+      if (narrationTypewriterInterval) clearInterval(narrationTypewriterInterval);
+      
+      const script = narrationScripts[sceneIndex];
+      if (!script) return;
+      
+      const utterance = new SpeechSynthesisUtterance(script);
+      utterance.rate = 0.92;         // Slightly slower for clarity & gravitas
+      utterance.pitch = 0.95;         // Slightly lower pitch = more authoritative
+      utterance.volume = 1.0;
+      
+      // Load voices (may need async in some browsers)
+      let voice = getPreferredVoice();
+      if (voice) utterance.voice = voice;
+      
+      utterance.onstart = () => {
+        voiceStatusEl.classList.remove('hidden');
+        voiceStatusEl.classList.add('flex');
+        // Duck the music
+        const approxDuration = script.length / 14; // rough: 14 chars/sec
+        audio.duckForSpeech(approxDuration);
+        // Start typewriter
+        typewriterDisplay(script);
+      };
+      
+      utterance.onend = () => {
+        voiceStatusEl.classList.add('hidden');
+        voiceStatusEl.classList.remove('flex');
+        if (narrationTypewriterInterval) clearInterval(narrationTypewriterInterval);
+        setTimeout(() => {
+          narrationLineBox.classList.add('hidden');
+        }, 2000);
+      };
+      
+      utterance.onerror = () => {
+        voiceStatusEl.classList.add('hidden');
+        voiceStatusEl.classList.remove('flex');
+      };
+      
+      currentUtterance = utterance;
+      window.speechSynthesis.speak(utterance);
+    }
+    
+    // Voices may not be loaded synchronously on first call
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = () => {
+        // Voices are now available — no action needed, will be called on next speakScene()
+      };
+    }
 
     // =========================================================================
     // CANVAS VFX ENGINE: 3D TERRAIN, HYDROLOGY, ORBIT SATELLITES & CYBER HUD
@@ -702,7 +901,7 @@
     const scenes = [
       {
         id: "scene-problem",
-        duration: 18,
+        duration: 75,
         title: "THE CRISIS: UNVERIFIED RURAL WATER ASSETS",
         subtitle: "India spends ₹15,000+ Crore annually on check-dams and watershed structures. Yet over 40% fail due to blind guesswork siting, and ghost assets siphon public funds without ever storing a drop of water.",
         sfx: "bassDrop",
@@ -1005,27 +1204,11 @@
     const btnPlay = document.getElementById('btn-play');
     const playIcon = document.getElementById('play-icon');
     
-    function speakNarration(text) {
-      if ('speechSynthesis' in window && !audio.isMuted) {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 1.05;
-        utterance.pitch = 1.0;
-        
-        // Select an expressive English voice if available
-        const voices = window.speechSynthesis.getVoices();
-        const engVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('David')));
-        if (engVoice) utterance.voice = engVoice;
-        
-        window.speechSynthesis.speak(utterance);
-      }
-    }
-    
     function renderScene(index) {
       currentSceneIndex = index;
       const scene = scenes[index];
       sceneContainer.innerHTML = scene.render();
-      subtitleText.textContent = scene.subtitle;
+      subtitleText.textContent = scene.title;
       
       // Trigger SFX
       audio.init();
@@ -1033,14 +1216,35 @@
       else if (scene.sfx === 'scanBeep') audio.playScanBeep();
       else if (scene.sfx === 'bassDrop') audio.playBassDrop();
       
-      // Voice narration
-      speakNarration(scene.subtitle);
+      // Speak the full narration for this scene (with slight delay to let SFX finish)
+      setTimeout(() => speakScene(index), 700);
+    }
+    
+    // Scene auto-advance: wait for speech synthesis to finish, then advance after a pause
+    let sceneReadyToAdvance = false;
+    
+    function setupSceneAdvance(index) {
+      sceneReadyToAdvance = false;
+      const script = narrationScripts[index];
+      if (!script) {
+        // No script, advance after scene duration
+        setTimeout(() => { sceneReadyToAdvance = true; }, scenes[index].duration * 1000);
+        return;
+      }
+      
+      // Estimate speech duration: ~12 chars/second at rate 0.92
+      const estimatedMs = (script.length / 12) * 1000;
+      const minMs = scenes[index].duration * 1000;
+      const waitMs = Math.max(estimatedMs + 3000, minMs); // 3s buffer after speech ends
+      setTimeout(() => { sceneReadyToAdvance = true; }, waitMs);
     }
     
     function jumpToScene(index) {
       currentSceneIndex = index;
       sceneStartTime = performance.now();
+      sceneReadyToAdvance = false;
       renderScene(index);
+      setupSceneAdvance(index);
     }
     
     // Playback loop
@@ -1070,25 +1274,21 @@
           bar.style.height = `${Math.floor(Math.random() * 16) + 4}px`;
         });
         
-        // Scene Transition Check
-        if (sceneElapsed >= currentScene.duration) {
+        // Scene Transition Check — waits for narration to finish
+        if (sceneReadyToAdvance) {
           if (currentSceneIndex < scenes.length - 1) {
-            currentSceneIndex++;
-            sceneStartTime = performance.now();
-            renderScene(currentSceneIndex);
+            jumpToScene(currentSceneIndex + 1);
           } else {
-            // Loop back or finish
-            currentSceneIndex = 0;
-            sceneStartTime = performance.now();
-            renderScene(0);
+            // Loop back to beginning
+            jumpToScene(0);
           }
         }
       }
       requestAnimationFrame(updateTimeline);
     }
     
-    // Initial Render
-    renderScene(0);
+    // Initial Render — use jumpToScene so advance logic is wired up
+    jumpToScene(0);
     requestAnimationFrame(updateTimeline);
     
     // Play / Pause Controls
@@ -1107,12 +1307,21 @@
       jumpToScene(0);
     });
     
+    // Replay narration for current scene
+    document.getElementById('btn-narrate').addEventListener('click', () => {
+      audio.init();
+      speakScene(currentSceneIndex);
+    });
+    
     document.getElementById('btn-audio').addEventListener('click', () => {
       audio.init();
       const muted = audio.toggleMute();
       document.getElementById('audio-icon').textContent = muted ? 'volume_off' : 'volume_up';
       if (muted && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
+        voiceStatusEl.classList.add('hidden');
+        voiceStatusEl.classList.remove('flex');
+        narrationLineBox.classList.add('hidden');
       }
     });
 
