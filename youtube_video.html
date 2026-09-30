@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JalDrishti - Cinematic VFX Explainer Video | SIH 2026</title>
+  
+  <!-- Modern Typography Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    :root {
+      --neon-cyan: #00f0ff;
+      --neon-blue: #0077fe;
+      --neon-green: #00ff88;
+      --neon-purple: #b000ff;
+      --neon-red: #ff0055;
+      --neon-amber: #ffaa00;
+      --bg-dark: #02050e;
+    }
+    
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+    
+    body {
+      background-color: #010206;
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .font-orbitron { font-family: 'Orbitron', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .font-sans { font-family: 'Inter', sans-serif; }
+    
+    /* 16:9 Cinema Aspect Ratio Frame */
+    #video-wrapper {
+      position: relative;
+      width: 100vw;
+      height: 56.25vw; /* 16:9 aspect ratio */
+      max-height: 100vh;
+      max-width: 177.78vh; /* 16:9 aspect ratio */
+      background: radial-gradient(circle at center, #061126 0%, #02050e 100%);
+      box-shadow: 0 0 100px rgba(0, 240, 255, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.12);
+      overflow: hidden;
+      border-radius: 4px;
+    }
+    
+    /* Main FX Canvas */
+    #fx-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+    }
+    
+    /* CRT Scanline & Lens Vignette */
+    .scanlines {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.3) 50%
+      ), linear-gradient(
+        90deg,
+        rgba(255, 0, 0, 0.02),
+        rgba(0, 255, 0, 0.01),
+        rgba(0, 0, 255, 0.02)
+      );
+      background-size: 100% 3px, 6px 100%;
+      pointer-events: none;
+      z-index: 40;
+      opacity: 0.5;
+    }
+    
+    .vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, transparent 55%, rgba(1, 2, 6, 0.92) 100%);
+      pointer-events: none;
+      z-index: 41;
+    }
+    
+    /* Cyber Glows */
+    .glow-cyan { text-shadow: 0 0 18px rgba(0, 240, 255, 0.85), 0 0 35px rgba(0, 240, 255, 0.4); }
+    .glow-red { text-shadow: 0 0 18px rgba(255, 0, 85, 0.85), 0 0 35px rgba(255, 0, 85, 0.4); }
+    .glow-green { text-shadow: 0 0 18px rgba(0, 255, 136, 0.85), 0 0 35px rgba(0, 255, 136, 0.4); }
+    .glow-amber { text-shadow: 0 0 18px rgba(255, 170, 0, 0.85), 0 0 35px rgba(255, 170, 0, 0.4); }
+    .glow-purple { text-shadow: 0 0 18px rgba(176, 0, 255, 0.85), 0 0 35px rgba(176, 0, 255, 0.4); }
+    
+    .box-glow-cyan { box-shadow: 0 0 30px rgba(0, 240, 255, 0.35), inset 0 0 15px rgba(0, 240, 255, 0.2); }
+    .box-glow-red { box-shadow: 0 0 30px rgba(255, 0, 85, 0.35), inset 0 0 15px rgba(255, 0, 85, 0.2); }
+    .box-glow-green { box-shadow: 0 0 30px rgba(0, 255, 136, 0.35), inset 0 0 15px rgba(0, 255, 136, 0.2); }
+    
+    /* HUD Corner Reticles */
+    .hud-corner {
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      border-color: var(--neon-cyan);
+      z-index: 30;
+      pointer-events: none;
+      opacity: 0.75;
+    }
+    .hud-tl { top: 16px; left: 16px; border-top: 2px solid; border-left: 2px solid; }
+    .hud-tr { top: 16px; right: 16px; border-top: 2px solid; border-right: 2px solid; }
+    .hud-bl { bottom: 16px; left: 16px; border-bottom: 2px solid; border-left: 2px solid; }
+    .hud-br { bottom: 16px; right: 16px; border-bottom: 2px solid; border-right: 2px solid; }
+    
+    /* Dynamic Scene Transition Animations */
+    .scene-anim-enter {
+      animation: sceneZoomIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes sceneZoomIn {
+      0% { opacity: 0; transform: scale(0.92) translateY(18px); filter: blur(10px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+    }
+    
+    /* Audio EQ Visualizer Bar */
+    .eq-bar {
+      width: 3.5px;
+      background: var(--neon-cyan);
+      border-radius: 2px;
+      transition: height 0.08s ease;
+    }
+    
+    /* Shimmer effect */
+    .cyber-shimmer {
+      background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 100%);
+      background-size: 200% 100%;
+      animation: shimmer 3s infinite;
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Video Main Container (16:9 1080p Aspect Ratio) -->
+  <div id="video-wrapper">
+    
+    <!-- Canvas for 3D DEM Terrain, River Flow, Matrix Stars, Orbit Satellite, Laser HUD -->
+    <canvas id="fx-canvas"></canvas>
+    
+    <!-- CRT Scanline & Lens Vignette -->
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+    
+    <!-- Cyber HUD Framing Reticles -->
+    <div class="hud-corner hud-tl"></div>
+    <div class="hud-corner hud-tr"></div>
+    <div class="hud-corner hud-bl"></div>
+    <div class="hud-corner hud-br"></div>
+    
+    <!-- Top HUD Banner -->
+    <div class="absolute top-4 left-7 right-7 z-30 flex items-center justify-between pointer-events-none">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2.5 px-3 py-1 rounded bg-blue-950/70 border border-cyan-400/50 backdrop-blur-md shadow-lg shadow-cyan-950/50">
+          <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+          <span class="font-orbitron text-xs font-bold tracking-wider text-cyan-300">JALDRISHTI // GEOSPATIAL AI</span>
+        </div>
+        <div class="text-[11px] font-mono text-cyan-400/80 tracking-widest hidden md:flex items-center gap-2">
+          <span>SIH 2026</span>
+          <span>•</span>
+          <span>PROBLEM STATEMENT: SIH26031</span>
+          <span>•</span>
+          <span class="text-white font-bold">TEAM INNOVA8</span>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-4">
+        <!-- Live Audio Spectrum Visualizer -->
+        <div id="audio-eq" class="flex items-end gap-1 h-5 px-2.5 py-1 rounded bg-black/50 border border-cyan-500/30">
+          <div class="eq-bar h-2 bg-cyan-400"></div>
+          <div class="eq-bar h-4 bg-cyan-400"></div>
+          <div class="eq-bar h-1 bg-cyan-400"></div>
+          <div class="eq-bar h-5 bg-cyan-400"></div>
+          <div class="eq-bar h-3 bg-cyan-400"></div>
+          <div class="eq-bar h-4 bg-cyan-400"></div>
+        </div>
+        
+        <!-- Live Timestamp & REC Pill -->
+        <div class="flex items-center gap-2 px-3 py-1 rounded bg-red-950/50 border border-red-500/40 font-mono text-xs shadow-md">
+          <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+          <span class="text-red-400 font-bold tracking-wider">LIVE REC</span>
+          <span id="timecode" class="text-gray-200 font-bold">00:00:00.00</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Dynamic Scene Container (HTML Elements rendered per scene) -->
+    <div id="scene-container" class="absolute inset-0 z-20 flex flex-col items-center justify-center p-8 md:p-14 pointer-events-none">
+      <!-- Injected by JavaScript Scene Controller -->
+    </div>
+    
+    <!-- Bottom Cinematic Subtitles & Voiceover Narration Bar -->
+    <div class="absolute bottom-16 left-8 right-8 z-30 flex flex-col items-center pointer-events-none">
+      <div id="subtitle-box" class="max-w-4xl px-6 py-2.5 rounded-xl bg-black/85 border border-cyan-500/40 backdrop-blur-xl shadow-2xl text-center">
+        <p id="subtitle-text" class="text-base md:text-xl font-semibold tracking-wide text-cyan-100 font-sans">
+          Initializing JalDrishti Geospatial Intelligence Engine...
+        </p>
+      </div>
+    </div>
+    
+    <!-- Interactive Video Control & Navigation Bar -->
+    <div class="absolute bottom-2.5 left-5 right-5 z-50 flex items-center justify-between text-xs font-mono text-gray-300 pointer-events-auto bg-black/80 border border-white/10 px-4 py-2 rounded-lg backdrop-blur-md">
+      <!-- Play/Pause, Replay & Audio Controls -->
+      <div class="flex items-center gap-3">
+        <button id="btn-play" class="p-1.5 rounded-md bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-300 transition-all flex items-center justify-center active:scale-95" title="Play/Pause">
+          <span id="play-icon" class="material-symbols-outlined text-lg">pause</span>
+        </button>
+        <button id="btn-restart" class="p-1.5 rounded-md hover:bg-white/10 text-gray-300 transition-all active:scale-95" title="Restart Video from Beginning">
+          <span class="material-symbols-outlined text-lg">replay</span>
+        </button>
+        <button id="btn-audio" class="p-1.5 rounded-md hover:bg-white/10 text-cyan-300 transition-all active:scale-95" title="Toggle Sound / Voiceover">
+          <span id="audio-icon" class="material-symbols-outlined text-lg">volume_up</span>
+        </button>
+        
+        <!-- Timeline Progress Track -->
+        <div class="w-36 sm:w-64 md:w-80 h-2 bg-gray-800 rounded-full overflow-hidden relative cursor-pointer" id="timeline-track">
+          <div id="timeline-fill" class="h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-green-400 w-0 transition-all duration-100"></div>
+        </div>
+        <span id="progress-time" class="text-[11px] text-cyan-400 font-bold">0:00 / 2:00</span>
+      </div>
+      
+      <!-- Scene Jump Shortcuts -->
+      <div class="hidden xl:flex items-center gap-1.5">
+        <button onclick="jumpToScene(0)" class="px-2 py-0.5 rounded text-[11px] hover:bg-cyan-500/20 text-gray-300 transition-colors">1. Crisis</button>
+        <button onclick="jumpToScene(1)" class="px-2 py-0.5 rounded text-[11px] hover:bg-cyan-500/20 text-gray-300 transition-colors">2. Solution</button>
+        <button onclick="jumpToScene(2)" class="px-2 py-0.5 rounded text-[11px] hover:bg-cyan-500/20 text-gray-300 transition-colors">3. Vector GIS</button>
+        <button onclick="jumpToScene(3)" class="px-2 py-0.5 rounded text-[11px] hover:bg-cyan-500/20 text-gray-300 transition-colors">4. AI Forensics</button>
+        <button onclick="jumpToScene(4)" class="px-2 py-0.5 rounded text-[11px] hover:bg-cyan-500/20 text-gray-300 transition-colors">5. IoT & Satellite</button>
+        <button onclick="jumpToScene(5)" class="px-2 py-0.5 rounded text-[11px] hover:bg-cyan-500/20 text-gray-300 transition-colors">6. Impact</button>
+      </div>
+      
+      <!-- Action Buttons: Export Video & Open Platform -->
+      <div class="flex items-center gap-2">
+        <button id="btn-record-video" class="px-3.5 py-1 rounded bg-gradient-to-r from-red-600 via-pink-600 to-red-600 hover:from-red-500 hover:to-pink-500 text-white font-bold tracking-wider flex items-center gap-1.5 shadow-lg shadow-red-950/60 active:scale-95 transition-all text-xs">
+          <span class="material-symbols-outlined text-sm">videocam</span>
+          <span>EXPORT 1080P VIDEO</span>
+        </button>
+        <a href="index.html" class="px-3 py-1 rounded bg-cyan-950/60 hover:bg-cyan-800/60 border border-cyan-500/40 text-cyan-300 flex items-center gap-1 transition-all text-xs">
+          <span>Live App</span>
+          <span class="material-symbols-outlined text-xs">open_in_new</span>
+        </a>
+      </div>
+    </div>
+    
+  </div>
+
+  <!-- Audio Synthesis & Dynamic Visual Effects Engine -->
+  <script>
+    // =========================================================================
+    // PROCEDURAL AUDIO SYNTHESIZER & SFX ENGINE (Web Audio API)
+    // =========================================================================
+    class CinematicAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.isMuted = false;
+        this.masterGain = null;
+        this.mediaStreamDest = null;
+        this.beatInterval = null;
+      }
+      
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+          this.masterGain = this.ctx.createGain();
+          this.masterGain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+          
+          // Stream destination for video export audio recording
+          this.mediaStreamDest = this.ctx.createMediaStreamDestination();
+          
+          this.masterGain.connect(this.ctx.destination);
+          this.masterGain.connect(this.mediaStreamDest);
+          
+          this.startAmbientSoundtrack();
+        }
+      }
+      
+      startAmbientSoundtrack() {
+        if (!this.ctx || this.isMuted) return;
+        
+        // Sci-Fi cinematic chord drone (Root A1 55Hz + D2 73.4Hz + E2 82.4Hz)
+        const freqs = [55, 73.41, 110, 164.81];
+        freqs.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          const filter = this.ctx.createBiquadFilter();
+          
+          osc.type = idx % 2 === 0 ? 'sawtooth' : 'sine';
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(220 + idx * 60, this.ctx.currentTime);
+          
+          gain.gain.setValueAtTime(0.04 / (idx + 1), this.ctx.currentTime);
+          
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.masterGain);
+          osc.start();
+        });
+        
+        // Procedural rhythmic pulse every 800ms
+        if (!this.beatInterval) {
+          this.beatInterval = setInterval(() => {
+            if (!this.isMuted && this.ctx && this.ctx.state === 'running') {
+              this.playSubtlePulse();
+            }
+          }, 800);
+        }
+      }
+      
+      playSubtlePulse() {
+        if (!this.ctx || this.isMuted) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(60, now);
+        osc.frequency.exponentialRampToValueAtTime(30, now + 0.15);
+        
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+        
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      }
+      
+      playWhoosh() {
+        if (!this.ctx || this.isMuted) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.exponentialRampToValueAtTime(950, now + 0.35);
+        osc.frequency.exponentialRampToValueAtTime(90, now + 0.7);
+        
+        gain.gain.setValueAtTime(0.28, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+        
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + 0.7);
+      }
+      
+      playScanBeep() {
+        if (!this.ctx || this.isMuted) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(900, now);
+        osc.frequency.setValueAtTime(1800, now + 0.09);
+        osc.frequency.setValueAtTime(2400, now + 0.18);
+        
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+        
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + 0.28);
+      }
+      
+      playBassDrop() {
+        if (!this.ctx || this.isMuted) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.exponentialRampToValueAtTime(32, now + 0.95);
+        
+        gain.gain.setValueAtTime(0.55, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.95);
+        
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + 0.95);
+      }
+      
+      toggleMute() {
+        this.isMuted = !this.isMuted;
+        if (this.masterGain) {
+          this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : 0.3, this.ctx.currentTime);
+        }
+        return this.isMuted;
+      }
+    }
+    
+    const audio = new CinematicAudioEngine();
+
+    // =========================================================================
+    // CANVAS VFX ENGINE: 3D TERRAIN, HYDROLOGY, ORBIT SATELLITES & CYBER HUD
+    // =========================================================================
+    const canvas = document.getElementById('fx-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    let width, height;
+    function resizeCanvas() {
+      const rect = document.getElementById('video-wrapper').getBoundingClientRect();
+      width = canvas.width = rect.width;
+      height = canvas.height = rect.height;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    
+    // VFX Particle System
+    class Particle {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.vx = (Math.random() - 0.5) * 1.8;
+        this.vy = (Math.random() - 0.5) * 1.8;
+        this.size = Math.random() * 2.2 + 1;
+        this.alpha = Math.random() * 0.7 + 0.2;
+        this.color = Math.random() > 0.5 ? '#00f0ff' : (Math.random() > 0.5 ? '#00ff88' : '#0077fe');
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        if (this.x < 0 || this.x > width || this.y < 0 || this.y > height) this.reset();
+      }
+      draw(c) {
+        c.save();
+        c.globalAlpha = this.alpha;
+        c.fillStyle = this.color;
+        c.shadowBlur = 12;
+        c.shadowColor = this.color;
+        c.beginPath();
+        c.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        c.fill();
+        c.restore();
+      }
+    }
+    const particles = Array.from({ length: 110 }, () => new Particle());
+    
+    // 3D Terrain Wireframe Simulation
+    let terrainScroll = 0;
+    function draw3DTerrain(c, time, color = 'rgba(0, 240, 255, 0.35)') {
+      c.save();
+      const horizon = height * 0.62;
+      const fov = 380;
+      const rows = 20;
+      const cols = 32;
+      
+      c.strokeStyle = color;
+      c.lineWidth = 1.2;
+      
+      terrainScroll += 0.9;
+      if (terrainScroll > 32) terrainScroll = 0;
+      
+      for (let r = 0; r < rows; r++) {
+        const z = (rows - r) * 22 - terrainScroll;
+        if (z <= 10) continue;
+        const scale = fov / z;
+        const yScreen = horizon + (r * 18);
+        
+        c.beginPath();
+        for (let col = 0; col <= cols; col++) {
+          const xWorld = (col - cols / 2) * 42;
+          const xScreen = width / 2 + (xWorld * scale);
+          const elevation = Math.sin(col * 0.38 + time * 2) * Math.cos(r * 0.32) * 38;
+          const yPos = yScreen - (elevation * scale);
+          
+          if (col === 0) c.moveTo(xScreen, yPos);
+          else c.lineTo(xScreen, yPos);
+        }
+        c.stroke();
+      }
+      
+      // Vertical grid cross-lines
+      for (let col = 0; col <= cols; col += 2) {
+        c.beginPath();
+        for (let r = 0; r < rows; r++) {
+          const z = (rows - r) * 22 - terrainScroll;
+          if (z <= 10) continue;
+          const scale = fov / z;
+          const yScreen = horizon + (r * 18);
+          const xWorld = (col - cols / 2) * 42;
+          const xScreen = width / 2 + (xWorld * scale);
+          const elevation = Math.sin(col * 0.38 + time * 2) * Math.cos(r * 0.32) * 38;
+          const yPos = yScreen - (elevation * scale);
+          
+          if (r === 0) c.moveTo(xScreen, yPos);
+          else c.lineTo(xScreen, yPos);
+        }
+        c.stroke();
+      }
+      c.restore();
+    }
+    
+    // Hydrology Water Stream Animation
+    function drawHydrologyStreams(c, time) {
+      c.save();
+      c.lineWidth = 3.5;
+      c.strokeStyle = '#00f0ff';
+      c.shadowColor = '#00f0ff';
+      c.shadowBlur = 18;
+      
+      // Main river spine
+      c.beginPath();
+      c.moveTo(width * 0.18, 0);
+      c.bezierCurveTo(width * 0.32, height * 0.3, width * 0.38, height * 0.6, width * 0.78, height);
+      c.stroke();
+      
+      // Tributary 1
+      c.lineWidth = 2.2;
+      c.strokeStyle = '#00ff88';
+      c.shadowColor = '#00ff88';
+      c.beginPath();
+      c.moveTo(width * 0.72, 0);
+      c.bezierCurveTo(width * 0.62, height * 0.24, width * 0.48, height * 0.4, width * 0.36, height * 0.44);
+      c.stroke();
+      
+      // Tributary 2
+      c.beginPath();
+      c.moveTo(0, height * 0.42);
+      c.bezierCurveTo(width * 0.16, height * 0.46, width * 0.26, height * 0.54, width * 0.42, height * 0.64);
+      c.stroke();
+      
+      // Check Dam node pulsating on river
+      const damX = width * 0.42;
+      const damY = height * 0.64;
+      
+      c.fillStyle = '#ff0055';
+      c.shadowColor = '#ff0055';
+      c.shadowBlur = 25;
+      c.beginPath();
+      c.arc(damX, damY, 9 + Math.sin(time * 6) * 3.5, 0, Math.PI * 2);
+      c.fill();
+      
+      // Water flow pulses
+      const pulseProgress = (time * 1.6) % 1;
+      const px = width * 0.18 + (width * 0.6 * pulseProgress);
+      const py = height * pulseProgress;
+      c.fillStyle = '#ffffff';
+      c.shadowColor = '#00f0ff';
+      c.beginPath();
+      c.arc(px, py, 4.5, 0, Math.PI * 2);
+      c.fill();
+      
+      c.restore();
+    }
+    
+    // Forensics Laser Scanning Animation
+    let scanY = 0;
+    function drawForensicScanner(c) {
+      c.save();
+      scanY = (scanY + 3.5) % height;
+      
+      const grad = c.createLinearGradient(0, scanY - 35, 0, scanY + 35);
+      grad.addColorStop(0, 'transparent');
+      grad.addColorStop(0.5, 'rgba(0, 255, 136, 0.45)');
+      grad.addColorStop(1, 'transparent');
+      
+      c.fillStyle = grad;
+      c.fillRect(0, scanY - 35, width, 70);
+      
+      c.strokeStyle = '#00ff88';
+      c.lineWidth = 2.5;
+      c.shadowColor = '#00ff88';
+      c.shadowBlur = 20;
+      c.beginPath();
+      c.moveTo(0, scanY);
+      c.lineTo(width, scanY);
+      c.stroke();
+      c.restore();
+    }
+    
+    // Satellite Orbital Mesh & Ground Beams
+    function drawSatelliteMesh(c, time) {
+      c.save();
+      const satX = width * 0.8 + Math.cos(time * 0.8) * 40;
+      const satY = height * 0.22 + Math.sin(time * 0.8) * 20;
+      
+      // Orbital Ring
+      c.strokeStyle = 'rgba(176, 0, 255, 0.35)';
+      c.lineWidth = 1.5;
+      c.beginPath();
+      c.ellipse(width * 0.8, height * 0.22, 100, 45, Math.PI / 6, 0, Math.PI * 2);
+      c.stroke();
+      
+      // Satellite Body
+      c.fillStyle = '#00f0ff';
+      c.shadowColor = '#00f0ff';
+      c.shadowBlur = 20;
+      c.beginPath();
+      c.arc(satX, satY, 7, 0, Math.PI * 2);
+      c.fill();
+      
+      // Laser Downlink to Earth Station
+      const groundX = width * 0.35;
+      const groundY = height * 0.75;
+      
+      c.strokeStyle = 'rgba(0, 240, 255, 0.45)';
+      c.lineWidth = 1.5;
+      c.setLineDash([6, 6]);
+      c.beginPath();
+      c.moveTo(satX, satY);
+      c.lineTo(groundX, groundY);
+      c.stroke();
+      c.setLineDash([]);
+      
+      // Ground node pulse
+      c.fillStyle = '#00ff88';
+      c.shadowColor = '#00ff88';
+      c.shadowBlur = 15;
+      c.beginPath();
+      c.arc(groundX, groundY, 6 + Math.sin(time * 5) * 2, 0, Math.PI * 2);
+      c.fill();
+      
+      c.restore();
+    }
+    
+    // Main Render Loop
+    let startTime = performance.now();
+    function animate() {
+      const now = performance.now();
+      const time = (now - startTime) / 1000;
+      
+      ctx.clearRect(0, 0, width, height);
+      
+      // Draw background cyber grid
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
+      ctx.lineWidth = 1;
+      const gridSize = 45;
+      for (let x = 0; x < width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+      
+      // Render active scene visuals
+      if (currentSceneIndex === 0) {
+        // Red Crisis particles & alarms
+        particles.forEach(p => { p.color = '#ff0055'; p.update(); p.draw(ctx); });
+      } else if (currentSceneIndex === 2) {
+        // 3D DEM Terrain & Hydrology Streams
+        draw3DTerrain(ctx, time, 'rgba(0, 240, 255, 0.4)');
+        drawHydrologyStreams(ctx, time);
+        particles.forEach(p => { p.color = '#00f0ff'; p.update(); p.draw(ctx); });
+      } else if (currentSceneIndex === 3) {
+        // Neural Forensics Matrix Scanner
+        drawForensicScanner(ctx);
+        particles.forEach(p => { p.color = '#00ff88'; p.update(); p.draw(ctx); });
+      } else if (currentSceneIndex === 4) {
+        // IoT Mesh & Satellite Downlink
+        drawSatelliteMesh(ctx, time);
+        particles.forEach(p => { p.color = '#b000ff'; p.update(); p.draw(ctx); });
+      } else {
+        // High-tech particle cosmos
+        particles.forEach(p => { p.update(); p.draw(ctx); });
+      }
+      
+      requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+
+    // =========================================================================
+    // SCENE TIMELINE & VIDEO DIRECTOR
+    // =========================================================================
+    const scenes = [
+      {
+        id: "scene-problem",
+        duration: 18,
+        title: "THE CRISIS: UNVERIFIED RURAL WATER ASSETS",
+        subtitle: "India spends ₹15,000+ Crore annually on check-dams and watershed structures. Yet over 40% fail due to blind guesswork siting, and ghost assets siphon public funds without ever storing a drop of water.",
+        sfx: "bassDrop",
+        render: () => `
+          <div class="scene-anim-enter flex flex-col items-center text-center max-w-5xl">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-950/90 border border-red-500 text-red-400 font-mono text-xs font-bold tracking-widest mb-5 box-glow-red animate-pulse">
+              <span class="material-symbols-outlined text-sm">warning</span> CRITICAL WATERSHED CRISIS DETECTED
+            </div>
+            
+            <h1 class="text-3xl sm:text-4xl md:text-6xl font-orbitron font-black tracking-tight text-white mb-5 uppercase">
+              THE <span class="text-red-500 glow-red">₹15,000 CRORE</span> WATERSHED BLINDSPOT
+            </h1>
+            
+            <!-- 3 Crisis Metric Pillars -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 w-full mt-3">
+              <div class="p-5 rounded-xl bg-red-950/40 border border-red-500/40 backdrop-blur-md">
+                <div class="text-3xl md:text-5xl font-orbitron font-black text-red-400 mb-2">40%+</div>
+                <div class="font-bold text-base text-white mb-1">Structures Run Dry</div>
+                <div class="text-xs text-gray-300 font-sans leading-relaxed">Placed by manual intuition with zero slope contour & hydrological runoff verification.</div>
+              </div>
+              
+              <div class="p-5 rounded-xl bg-red-950/40 border border-red-500/40 backdrop-blur-md">
+                <div class="text-3xl md:text-5xl font-orbitron font-black text-red-400 mb-2">₹ Billions</div>
+                <div class="font-bold text-base text-white mb-1">Ghost Infrastructure</div>
+                <div class="text-xs text-gray-300 font-sans leading-relaxed">Duplicate, recycled & AI-generated photos falsely claim milestone fund releases.</div>
+              </div>
+              
+              <div class="p-5 rounded-xl bg-red-950/40 border border-red-500/40 backdrop-blur-md">
+                <div class="text-3xl md:text-5xl font-orbitron font-black text-red-400 mb-2">60+ Days</div>
+                <div class="font-bold text-base text-white mb-1">Paper Audit Lag</div>
+                <div class="text-xs text-gray-300 font-sans leading-relaxed">Damaged check-dams and silted reservoirs go unmonitored until wells collapse.</div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: "scene-solution",
+        duration: 18,
+        title: "INTRODUCING JALDRISHTI",
+        subtitle: "Enter JalDrishti — the AI-powered Geospatial Intelligence and Cryptographic Watershed Verification Platform engineered for Smart India Hackathon 2026 by Team Innova8.",
+        sfx: "whoosh",
+        render: () => `
+          <div class="scene-anim-enter flex flex-col items-center text-center max-w-5xl">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/90 border border-cyan-400 text-cyan-300 font-mono text-xs font-bold tracking-widest mb-4 box-glow-cyan">
+              <span class="material-symbols-outlined text-sm">verified</span> SMART INDIA HACKATHON 2026 SUBMISSION
+            </div>
+            
+            <div class="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-tr from-cyan-600 via-blue-600 to-indigo-600 flex items-center justify-center shadow-2xl shadow-cyan-500/50 mb-4 box-glow-cyan animate-bounce">
+              <span class="material-symbols-outlined text-4xl md:text-5xl text-white">water_drop</span>
+            </div>
+            
+            <h1 class="text-4xl sm:text-5xl md:text-7xl font-orbitron font-black tracking-tight text-white mb-2">
+              JAL<span class="text-cyan-400 glow-cyan">DRISHTI</span>
+            </h1>
+            
+            <p class="text-lg md:text-2xl font-bold text-cyan-200 tracking-wide uppercase mb-6 font-sans">
+              Guarding Every Drop. Verifying Every Rupee.
+            </p>
+            
+            <div class="flex flex-wrap items-center justify-center gap-3 text-xs md:text-sm font-mono">
+              <span class="px-3.5 py-1.5 rounded-lg bg-blue-900/50 border border-cyan-500/50 text-cyan-300">✓ Full Vector GIS Hydrology</span>
+              <span class="px-3.5 py-1.5 rounded-lg bg-blue-900/50 border border-cyan-500/50 text-cyan-300">✓ Multi-Layer Neural Forensics</span>
+              <span class="px-3.5 py-1.5 rounded-lg bg-blue-900/50 border border-cyan-500/50 text-cyan-300">✓ Solar IoT LoRaWAN Mesh</span>
+              <span class="px-3.5 py-1.5 rounded-lg bg-blue-900/50 border border-cyan-500/50 text-cyan-300">✓ Sentinel-2 Satellite Timeline</span>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: "scene-gis-ai",
+        duration: 22,
+        title: "PILLAR 1: VECTOR GIS & AI DEM SITING ENGINE",
+        subtitle: "Using sub-meter vector tiles, JalDrishti automatically delineates catchment basins, computes DEM slope gradients in real-time, and applies SCS-CN curve numbers to score check-dam locations from 0 to 100%.",
+        sfx: "scanBeep",
+        render: () => `
+          <div class="scene-anim-enter grid grid-cols-1 md:grid-cols-2 gap-8 items-center max-w-6xl w-full">
+            <div class="space-y-4">
+              <div class="inline-block px-3 py-1 rounded bg-blue-950 border border-cyan-400 text-cyan-400 font-mono text-xs font-bold">
+                01 // HYDROLOGICAL OPTIMIZATION
+              </div>
+              <h2 class="text-3xl md:text-5xl font-orbitron font-black text-white leading-tight">
+                AI DEM SLOPE & <span class="text-cyan-400 glow-cyan">RUNOFF SOLVER</span>
+              </h2>
+              <p class="text-gray-300 text-sm md:text-base font-sans leading-relaxed">
+                Replaces guesswork with instant mathematical hydro-geomorphic analysis across Strahler 1st to 3rd order stream hierarchies.
+              </p>
+              
+              <div class="space-y-2.5 font-mono text-xs">
+                <div class="p-3 rounded-lg bg-black/70 border border-cyan-500/40 flex items-center justify-between">
+                  <span class="text-gray-400">Slope Contour Solver:</span>
+                  <span class="text-green-400 font-bold">3% – 12% OPTIMAL ZONE</span>
+                </div>
+                <div class="p-3 rounded-lg bg-black/70 border border-cyan-500/40 flex items-center justify-between">
+                  <span class="text-gray-400">SCS-CN Runoff Yield:</span>
+                  <span class="text-cyan-300 font-bold">142,500 m³ / Monsoon Season</span>
+                </div>
+                <div class="p-3 rounded-lg bg-black/70 border border-cyan-500/40 flex items-center justify-between">
+                  <span class="text-gray-400">Algorithmic Siting Verdict:</span>
+                  <span class="text-cyan-400 font-bold">94.8% SUITABILITY MATCH</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Holographic HUD Radar Visual -->
+            <div class="p-6 rounded-2xl bg-gradient-to-b from-blue-950/50 to-black/85 border border-cyan-500/50 backdrop-blur-xl box-glow-cyan flex flex-col items-center justify-center text-center relative overflow-hidden">
+              <div class="w-40 h-40 md:w-48 md:h-48 rounded-full border-2 border-dashed border-cyan-400/70 flex items-center justify-center animate-spin relative mb-4">
+                <div class="w-32 h-32 md:w-36 md:h-36 rounded-full border border-cyan-500/40 flex items-center justify-center">
+                  <div class="w-20 h-20 md:w-24 md:h-24 rounded-full bg-cyan-500/25 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-4xl text-cyan-300">explore</span>
+                  </div>
+                </div>
+              </div>
+              <div class="font-orbitron font-bold text-lg md:text-xl text-white">SUB-METER VECTOR MESH</div>
+              <div class="text-xs font-mono text-cyan-400">OpenFreeMap & MapLibre GL Integration</div>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: "scene-forensics",
+        duration: 22,
+        title: "PILLAR 2: MULTI-LAYER NEURAL AI FORENSICS",
+        subtitle: "To stop ghost infrastructure, JalDrishti inspects CMOS optical sensor Bayer pattern noise (PRNU), flags synthetic diffusion anomalies, and binds evidence to tamper-proof SHA-256 cryptographic certificates.",
+        sfx: "scanBeep",
+        render: () => `
+          <div class="scene-anim-enter grid grid-cols-1 md:grid-cols-2 gap-8 items-center max-w-6xl w-full">
+            <!-- Left Scanner Frame -->
+            <div class="p-6 rounded-2xl bg-black/85 border border-green-500/60 backdrop-blur-xl box-glow-green relative overflow-hidden">
+              <div class="flex items-center justify-between pb-3 border-b border-green-500/40 mb-4 font-mono text-xs text-green-400">
+                <span>[NEURAL PHOTO FORENSICS]</span>
+                <span class="animate-pulse flex items-center gap-1">● LIVE SCAN</span>
+              </div>
+              
+              <div class="h-40 md:h-44 bg-green-950/30 border border-green-500/40 rounded-lg flex items-center justify-center relative overflow-hidden mb-4">
+                <span class="material-symbols-outlined text-6xl text-green-400/70">camera_outdoor</span>
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent via-green-500/25 to-transparent animate-pulse"></div>
+                <div class="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/85 text-[10px] font-mono text-green-300">CMOS BAYER NOISE: PASS</div>
+                <div class="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/85 text-[10px] font-mono text-cyan-300">GPS: 19.8762°N, 75.3433°E</div>
+              </div>
+              
+              <div class="p-3 rounded bg-green-950/50 border border-green-500/50 font-mono text-xs text-green-300 flex items-center gap-2">
+                <span class="material-symbols-outlined text-base">lock</span>
+                <span class="truncate">SHA-256: 0x8f4d92a1c87e6b...94e1</span>
+              </div>
+            </div>
+            
+            <!-- Right Bullet Points -->
+            <div class="space-y-4">
+              <div class="inline-block px-3 py-1 rounded bg-green-950 border border-green-400 text-green-400 font-mono text-xs font-bold">
+                02 // ANTI-FRAUD VERIFICATION
+              </div>
+              <h2 class="text-3xl md:text-5xl font-orbitron font-black text-white leading-tight">
+                ZERO GHOST ASSETS. <span class="text-green-400 glow-green">CRYPTOGRAPHIC TRUTH.</span>
+              </h2>
+              <p class="text-gray-300 text-sm md:text-base font-sans leading-relaxed">
+                Ensures every rupee disbursed under PMKSY, MGNREGA, or CSR funds corresponds to physical ground reality.
+              </p>
+              
+              <div class="space-y-2 font-mono text-xs text-gray-200">
+                <div class="flex items-center gap-2">
+                  <span class="text-green-400 font-bold">✓</span> High-frequency optical photon noise variance filtering
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-green-400 font-bold">✓</span> Automated synthetic AI image & diffusion detection
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-green-400 font-bold">✓</span> Hardware focal length & EXIF integrity cross-validation
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-green-400 font-bold">✓</span> Legally admissible digital milestone audit certificates
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: "scene-iot",
+        duration: 22,
+        title: "PILLAR 3: IOT TELEMETRY & 5-SEASON SATELLITE PLAYBACK",
+        subtitle: "Autonomous solar LoRaWAN micro-probes track groundwater tables in real-time, while ultrasonic silt sensors trigger proactive desilting alerts. Combined with Sentinel-2 5-season satellite playback, impact is tracked year-round.",
+        sfx: "whoosh",
+        render: () => `
+          <div class="scene-anim-enter grid grid-cols-1 md:grid-cols-2 gap-8 items-center max-w-6xl w-full">
+            <div class="space-y-4">
+              <div class="inline-block px-3 py-1 rounded bg-indigo-950 border border-cyan-400 text-cyan-400 font-mono text-xs font-bold">
+                03 // CONTINUOUS MONITORING
+              </div>
+              <h2 class="text-3xl md:text-5xl font-orbitron font-black text-white leading-tight">
+                REAL-TIME <span class="text-cyan-400 glow-cyan">TELEMETRY & SATELLITE</span>
+              </h2>
+              <p class="text-gray-300 text-sm md:text-base font-sans leading-relaxed">
+                24/7 autonomous monitoring of water table elevation and reservoir silt accumulation.
+              </p>
+              
+              <div class="grid grid-cols-2 gap-3 font-mono text-xs">
+                <div class="p-3 rounded-lg bg-black/70 border border-cyan-500/40">
+                  <div class="text-gray-400">Groundwater Table:</div>
+                  <div class="text-xl md:text-2xl font-bold text-green-400 font-orbitron">+3.8 Meters</div>
+                </div>
+                <div class="p-3 rounded-lg bg-black/70 border border-cyan-500/40">
+                  <div class="text-gray-400">Silt Accumulation:</div>
+                  <div class="text-xl md:text-2xl font-bold text-amber-400 font-orbitron">14.2% (SAFE)</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Dual Sensor & Satellite Cards -->
+            <div class="space-y-4">
+              <div class="p-4 rounded-xl bg-blue-950/50 border border-cyan-500/50 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-lg bg-cyan-500/25 flex items-center justify-center text-cyan-300">
+                  <span class="material-symbols-outlined text-2xl animate-pulse">sensors</span>
+                </div>
+                <div>
+                  <div class="font-bold text-white text-sm">Solar Micro-RTU Sensor Probes</div>
+                  <div class="text-xs text-gray-300 font-mono">LoRaWAN Long-Range Mesh & 4G LTE-M Gateway</div>
+                </div>
+              </div>
+              
+              <div class="p-4 rounded-xl bg-indigo-950/50 border border-purple-500/50 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-lg bg-purple-500/25 flex items-center justify-center text-purple-300">
+                  <span class="material-symbols-outlined text-2xl">satellite_alt</span>
+                </div>
+                <div>
+                  <div class="font-bold text-white text-sm">Sentinel-2 MSI 5-Season Playback</div>
+                  <div class="text-xs text-gray-300 font-mono">10m Multi-Spectral NDVI Biomass & NDWI Surface Water</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: "scene-impact",
+        duration: 20,
+        title: "MEASURABLE SOCIO-ECONOMIC IMPACT",
+        subtitle: "JalDrishti delivers proven, transformative outcomes: +340% water retention, +144% farmer income increase, and an 82% reduction in administrative monitoring costs.",
+        sfx: "bassDrop",
+        render: () => `
+          <div class="scene-anim-enter flex flex-col items-center text-center max-w-5xl">
+            <div class="inline-block px-4 py-1.5 rounded-full bg-green-950 border border-green-400 text-green-300 font-mono text-xs font-bold tracking-widest mb-4 box-glow-green">
+              TRANSFORMATIVE GROUND IMPACT
+            </div>
+            
+            <h1 class="text-3xl sm:text-4xl md:text-6xl font-orbitron font-black text-white mb-6">
+              MEASURABLE <span class="text-green-400 glow-green">OUTCOMES</span>
+            </h1>
+            
+            <!-- 4 Massive Outcome Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full mb-6">
+              <div class="p-4 md:p-5 rounded-2xl bg-black/85 border border-green-500/50 box-glow-green">
+                <div class="text-2xl sm:text-3xl md:text-5xl font-orbitron font-black text-green-400 mb-1">+340%</div>
+                <div class="font-bold text-xs sm:text-sm text-white">Water Retention</div>
+                <div class="text-[10px] md:text-[11px] text-gray-400 font-mono">Flash Flood Buffer</div>
+              </div>
+              
+              <div class="p-4 md:p-5 rounded-2xl bg-black/85 border border-cyan-500/50 box-glow-cyan">
+                <div class="text-2xl sm:text-3xl md:text-5xl font-orbitron font-black text-cyan-300 mb-1">+3.5m</div>
+                <div class="font-bold text-xs sm:text-sm text-white">Aquifer Rise</div>
+                <div class="text-[10px] md:text-[11px] text-gray-400 font-mono">Sustained Borewells</div>
+              </div>
+              
+              <div class="p-4 md:p-5 rounded-2xl bg-black/85 border border-amber-500/50">
+                <div class="text-2xl sm:text-3xl md:text-5xl font-orbitron font-black text-amber-400 mb-1">+144%</div>
+                <div class="font-bold text-xs sm:text-sm text-white">Farmer Income</div>
+                <div class="text-[10px] md:text-[11px] text-gray-400 font-mono">₹58k to ₹1.42L / Yr</div>
+              </div>
+              
+              <div class="p-4 md:p-5 rounded-2xl bg-black/85 border border-purple-500/50">
+                <div class="text-2xl sm:text-3xl md:text-5xl font-orbitron font-black text-purple-400 mb-1">82%</div>
+                <div class="font-bold text-xs sm:text-sm text-white">Audit Cost Cut</div>
+                <div class="text-[10px] md:text-[11px] text-gray-400 font-mono">₹20k to ₹2.5k / Dam</div>
+              </div>
+            </div>
+            
+            <!-- Outro Grand Tagline -->
+            <div class="font-orbitron font-bold text-base md:text-xl text-cyan-300 tracking-wider">
+              TEAM INNOVA8 • SMART INDIA HACKATHON 2026 • SIH26031
+            </div>
+          </div>
+        `
+      }
+    ];
+
+    // =========================================================================
+    // VIDEO TIMELINE PLAYBACK CONTROLLER & SPEECH SYNTHESIS
+    // =========================================================================
+    let currentSceneIndex = 0;
+    let isPlaying = true;
+    let sceneStartTime = performance.now();
+    let totalElapsedSeconds = 0;
+    const totalDuration = scenes.reduce((sum, s) => sum + s.duration, 0);
+    
+    const sceneContainer = document.getElementById('scene-container');
+    const subtitleText = document.getElementById('subtitle-text');
+    const timecode = document.getElementById('timecode');
+    const timelineFill = document.getElementById('timeline-fill');
+    const progressTime = document.getElementById('progress-time');
+    const btnPlay = document.getElementById('btn-play');
+    const playIcon = document.getElementById('play-icon');
+    
+    function speakNarration(text) {
+      if ('speechSynthesis' in window && !audio.isMuted) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 1.05;
+        utterance.pitch = 1.0;
+        
+        // Select an expressive English voice if available
+        const voices = window.speechSynthesis.getVoices();
+        const engVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('David')));
+        if (engVoice) utterance.voice = engVoice;
+        
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+    
+    function renderScene(index) {
+      currentSceneIndex = index;
+      const scene = scenes[index];
+      sceneContainer.innerHTML = scene.render();
+      subtitleText.textContent = scene.subtitle;
+      
+      // Trigger SFX
+      audio.init();
+      if (scene.sfx === 'whoosh') audio.playWhoosh();
+      else if (scene.sfx === 'scanBeep') audio.playScanBeep();
+      else if (scene.sfx === 'bassDrop') audio.playBassDrop();
+      
+      // Voice narration
+      speakNarration(scene.subtitle);
+    }
+    
+    function jumpToScene(index) {
+      currentSceneIndex = index;
+      sceneStartTime = performance.now();
+      renderScene(index);
+    }
+    
+    // Playback loop
+    function updateTimeline() {
+      if (isPlaying) {
+        const now = performance.now();
+        const sceneElapsed = (now - sceneStartTime) / 1000;
+        const currentScene = scenes[currentSceneIndex];
+        
+        // Calculate total elapsed
+        let elapsed = 0;
+        for (let i = 0; i < currentSceneIndex; i++) elapsed += scenes[i].duration;
+        elapsed += sceneElapsed;
+        totalElapsedSeconds = Math.min(elapsed, totalDuration);
+        
+        // Update Timecode
+        const mins = Math.floor(totalElapsedSeconds / 60);
+        const secs = Math.floor(totalElapsedSeconds % 60);
+        const millis = Math.floor((totalElapsedSeconds % 1) * 100);
+        timecode.textContent = `00:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(millis).padStart(2, '0')}`;
+        progressTime.textContent = `${mins}:${String(secs).padStart(2, '0')} / ${Math.floor(totalDuration / 60)}:${String(Math.floor(totalDuration % 60)).padStart(2, '0')}`;
+        timelineFill.style.width = `${(totalElapsedSeconds / totalDuration) * 100}%`;
+        
+        // Animate Audio EQ
+        const eqBars = document.querySelectorAll('.eq-bar');
+        eqBars.forEach(bar => {
+          bar.style.height = `${Math.floor(Math.random() * 16) + 4}px`;
+        });
+        
+        // Scene Transition Check
+        if (sceneElapsed >= currentScene.duration) {
+          if (currentSceneIndex < scenes.length - 1) {
+            currentSceneIndex++;
+            sceneStartTime = performance.now();
+            renderScene(currentSceneIndex);
+          } else {
+            // Loop back or finish
+            currentSceneIndex = 0;
+            sceneStartTime = performance.now();
+            renderScene(0);
+          }
+        }
+      }
+      requestAnimationFrame(updateTimeline);
+    }
+    
+    // Initial Render
+    renderScene(0);
+    requestAnimationFrame(updateTimeline);
+    
+    // Play / Pause Controls
+    btnPlay.addEventListener('click', () => {
+      audio.init();
+      isPlaying = !isPlaying;
+      playIcon.textContent = isPlaying ? 'pause' : 'play_arrow';
+      if (!isPlaying && 'speechSynthesis' in window) {
+        window.speechSynthesis.pause();
+      } else if (isPlaying && 'speechSynthesis' in window) {
+        window.speechSynthesis.resume();
+      }
+    });
+    
+    document.getElementById('btn-restart').addEventListener('click', () => {
+      jumpToScene(0);
+    });
+    
+    document.getElementById('btn-audio').addEventListener('click', () => {
+      audio.init();
+      const muted = audio.toggleMute();
+      document.getElementById('audio-icon').textContent = muted ? 'volume_off' : 'volume_up';
+      if (muted && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    });
+
+    // =========================================================================
+    // EXPORT VIDEO RECORDER (MediaRecorder API - 60 FPS Stream + Procedural Audio)
+    // =========================================================================
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let isRecording = false;
+    
+    const btnRecord = document.getElementById('btn-record-video');
+    btnRecord.addEventListener('click', async () => {
+      audio.init();
+      if (!isRecording) {
+        startRecording();
+      } else {
+        stopRecording();
+      }
+    });
+    
+    function startRecording() {
+      recordedChunks = [];
+      const videoStream = canvas.captureStream(60); // 60 FPS recording
+      
+      let combinedStream = videoStream;
+      if (audio.mediaStreamDest) {
+        combinedStream = new MediaStream([
+          ...videoStream.getVideoTracks(),
+          ...audio.mediaStreamDest.stream.getAudioTracks()
+        ]);
+      }
+      
+      const options = { mimeType: 'video/webm; codecs=vp9,opus' };
+      try {
+        mediaRecorder = new MediaRecorder(combinedStream, options);
+      } catch (e) {
+        try {
+          mediaRecorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm' });
+        } catch (e2) {
+          mediaRecorder = new MediaRecorder(combinedStream);
+        }
+      }
+      
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          recordedChunks.push(event.data);
+        }
+      };
+      
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'JalDrishti_Cinematic_Explainer_Video.webm';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        btnRecord.innerHTML = `<span class="material-symbols-outlined text-sm">videocam</span><span>EXPORT 1080P VIDEO</span>`;
+        btnRecord.classList.remove('animate-pulse', 'from-amber-600', 'to-red-600');
+        isRecording = false;
+      };
+      
+      mediaRecorder.start();
+      isRecording = true;
+      btnRecord.innerHTML = `<span class="material-symbols-outlined text-sm">stop_circle</span><span>STOP & DOWNLOAD</span>`;
+      btnRecord.classList.add('animate-pulse', 'from-amber-600', 'to-red-600');
+      
+      // Auto jump to start
+      jumpToScene(0);
+    }
+    
+    function stopRecording() {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+    }
+  </script>
+</body>
+</html>
