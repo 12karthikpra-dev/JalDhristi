@@ -128,7 +128,7 @@ npx serve .
 ```
 
 ### 3. Open in Browser
-Visit `http://localhost:8080` in your web browser.
+Visit `https://jaldrishti-platform.onrender.com/#view-home' in your web browser.
 
 ---
 
