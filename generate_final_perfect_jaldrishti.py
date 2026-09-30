@@ -111,7 +111,7 @@ def generate_deck():
                 ("•  Theme – ", "Agriculture, FoodTech & Rural Development / Smart Automation"),
                 ("•  PS Category – ", "Software"),
                 ("•  Team ID – ", "T133"),
-                ("•  Team Name – ", "Team JalDrishti")
+                ("•  Team Name – ", "Innova8")
             ]
             for idx, (label, val) in enumerate(lines):
                 p = tf.paragraphs[0] if idx == 0 else tf.add_paragraph()
