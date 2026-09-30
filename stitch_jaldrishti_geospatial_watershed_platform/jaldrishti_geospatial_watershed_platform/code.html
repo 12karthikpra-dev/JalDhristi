@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>JalDrishti - AI-powered Geospatial Watershed Development &amp; Monitoring Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "inverse-surface": "#2e312f",
+            "tertiary-container": "#003f21",
+            "on-primary-fixed": "#002116",
+            "tertiary": "#002712",
+            "on-error": "#ffffff",
+            "surface-container": "#edeeeb",
+            "surface-container-lowest": "#ffffff",
+            "outline": "#717974",
+            "secondary": "#006495",
+            "tertiary-fixed-dim": "#89d7a1",
+            "surface-variant": "#e2e3e0",
+            "on-surface-variant": "#414944",
+            "error-container": "#ffdad6",
+            "on-tertiary": "#ffffff",
+            "on-primary-container": "#7ba894",
+            "on-secondary-container": "#004e75",
+            "background": "#f9faf7",
+            "secondary-container": "#70c0fd",
+            "on-background": "#191c1b",
+            "on-secondary": "#ffffff",
+            "on-secondary-fixed": "#001e30",
+            "inverse-on-surface": "#f0f1ee",
+            "outline-variant": "#c0c8c3",
+            "on-tertiary-fixed": "#00210e",
+            "tertiary-fixed": "#a4f4bc",
+            "on-primary": "#ffffff",
+            "primary": "#00261a",
+            "surface-container-highest": "#e2e3e0",
+            "surface-container-low": "#f3f4f1",
+            "on-tertiary-fixed-variant": "#00522c",
+            "surface": "#f9faf7",
+            "primary-container": "#0f3d2e",
+            "on-primary-fixed-variant": "#234f3f",
+            "on-surface": "#191c1b",
+            "surface-container-high": "#e7e8e6",
+            "surface-dim": "#d9dad7",
+            "on-secondary-fixed-variant": "#004b72",
+            "on-error-container": "#93000a",
+            "secondary-fixed-dim": "#90cdff",
+            "primary-fixed": "#beedd7",
+            "error": "#ba1a1a",
+            "primary-fixed-dim": "#a2d1bb",
+            "surface-tint": "#3b6756",
+            "on-tertiary-container": "#61ae7c",
+            "surface-bright": "#f9faf7",
+            "inverse-primary": "#a2d1bb",
+            "secondary-fixed": "#cbe6ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-md": "1rem",
+            "gutter": "1.5rem",
+            "margin": "2rem",
+            "space-xl": "2.5rem",
+            "space-sm": "0.5rem",
+            "space-lg": "1.5rem",
+            "space-xs": "0.25rem"
+          },
+          "fontFamily": {
+            "body-sm": ["Inter"],
+            "body-md": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-lg": ["Space Grotesk"],
+            "headline-sm": ["Space Grotesk"],
+            "headline-md": ["Space Grotesk"],
+            "headline-lg-mobile": ["Space Grotesk"],
+            "headline-xl": ["Space Grotesk"],
+            "data-mono": ["JetBrains Mono"],
+            "headline-xl-mobile": ["Space Grotesk"],
+            "label-md": ["Inter"]
+          },
+          "fontSize": {
+            "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "500" }],
+            "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+            "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "data-mono": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "400" }],
+            "headline-xl-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .glass-card {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(91, 107, 98, 0.15);
+    }
+    .dark-glass {
+      background: rgba(15, 61, 46, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(162, 209, 187, 0.2);
+    }
+    .topo-grid {
+      background-image: radial-gradient(rgba(31, 127, 184, 0.15) 1px, transparent 1px), radial-gradient(rgba(15, 61, 46, 0.08) 1px, transparent 1px);
+      background-size: 24px 24px;
+      background-position: 0 0, 12px 12px;
+    }
+    @keyframes pulse-slow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.02); }
+    }
+    .animate-pulse-slow {
+      animation: pulse-slow 4s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="bg-surface/80 dark:bg-inverse-surface/80 backdrop-blur-md sticky top-0 w-full z-50 border-b border-outline-variant/20 shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center w-full px-gutter py-3 max-w-7xl mx-auto">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded bg-primary-container flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-xl">water_drop</span>
+</div>
+<span class="text-headline-sm font-headline-sm font-bold text-primary dark:text-inverse-primary">JalDrishti</span>
+<span class="hidden md:inline-flex items-center px-2 py-0.5 rounded text-data-mono font-data-mono bg-surface-container text-on-surface-variant border border-outline-variant/30">SIH26015</span>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary transition-colors font-medium" href="#features">Platform</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary transition-colors font-medium" href="#capabilities">Telemetry</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary transition-colors font-medium" href="#how-it-works">Geospatial</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary transition-colors font-medium" href="#impact">Analytics</a>
+</nav>
+<div class="flex items-center gap-3">
+<a class="hidden sm:inline-flex items-center justify-center px-4 py-2 rounded bg-primary-container text-on-primary font-label-md hover:bg-primary transition-all duration-200 active:scale-98" href="#demo">
+          Launch Platform
+        </a>
+<button class="md:hidden p-2 text-on-surface" id="mobile-menu-btn">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</div>
+<!-- Mobile dropdown menu -->
+<div class="hidden md:hidden bg-surface-container border-b border-outline-variant/20 px-gutter py-4 flex flex-col gap-3" id="mobile-menu">
+<a class="py-2 text-on-surface font-medium" href="#features">Platform</a>
+<a class="py-2 text-on-surface font-medium" href="#capabilities">Telemetry</a>
+<a class="py-2 text-on-surface font-medium" href="#how-it-works">Geospatial</a>
+<a class="py-2 text-on-surface font-medium" href="#impact">Analytics</a>
+<a class="mt-2 py-2.5 px-4 bg-primary-container text-on-primary text-center rounded font-label-md" href="#demo">Launch Platform</a>
+</div>
+</header>
+<main class="w-full overflow-hidden">
+<!-- Hero Section -->
+<section class="relative pt-12 pb-20 md:pt-20 md:pb-32 px-gutter topo-grid">
+<div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+<!-- Left Column -->
+<div class="lg:col-span-6 flex flex-col gap-6 z-10">
+<div class="inline-flex items-center gap-2 self-start px-3 py-1 rounded bg-primary-fixed/40 border border-primary/20 text-on-primary-fixed text-data-mono font-data-mono">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+            Smart India Hackathon 2026 · SIH26015
+          </div>
+<h1 class="font-headline-xl text-on-background text-4xl md:text-5xl lg:text-6xl tracking-tight leading-tight">
+            Transforming Watersheds with <span class="text-primary-container dark:text-inverse-primary underline decoration-secondary decoration-2 underline-offset-8">Geospatial Intelligence</span>.
+          </h1>
+<p class="text-body-lg text-on-surface-variant max-w-xl">
+            An enterprise-grade AI and satellite monitoring ecosystem empowering government stakeholders, planners, and field officers to design, verify, and scale sustainable watershed development.
+          </p>
+<div class="flex flex-wrap items-center gap-4 pt-2">
+<a class="px-6 py-3.5 bg-primary-container text-on-primary rounded font-label-md text-base hover:bg-primary transition-all duration-200 shadow-sm flex items-center gap-2" href="#demo">
+              Explore Watershed Map
+              <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+<a class="px-6 py-3.5 bg-surface-container-high text-on-surface rounded font-label-md text-base hover:bg-surface-variant transition-all duration-200 border border-outline-variant/40" href="#how-it-works">
+              See How It Works
+            </a>
+</div>
+<!-- Trust chips -->
+<div class="pt-6 border-t border-outline-variant/30 grid grid-cols-3 gap-4">
+<div>
+<div class="font-headline-md font-bold text-primary-container">99.4%</div>
+<div class="text-data-mono text-on-surface-variant">Change Detection Accuracy</div>
+</div>
+<div>
+<div class="font-headline-md font-bold text-primary-container">1,420+</div>
+<div class="text-data-mono text-on-surface-variant">Watersheds Mapped</div>
+</div>
+<div>
+<div class="font-headline-md font-bold text-primary-container">45Mha</div>
+<div class="text-data-mono text-on-surface-variant">Monitored Area</div>
+</div>
+</div>
+</div>
+<!-- Right Column: 3D Topographic Watershed Map Preview -->
+<div class="lg:col-span-6 relative">
+<div class="absolute -inset-1.5 bg-gradient-to-r from-primary-container to-secondary rounded-xl blur-lg opacity-25 animate-pulse-slow"></div>
+<div class="relative glass-card rounded-xl p-4 md:p-6 shadow-xl overflow-hidden border border-outline-variant/30">
+<!-- Map Controls Header -->
+<div class="flex justify-between items-center pb-4 mb-4 border-b border-outline-variant/20">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-error inline-block"></span>
+<span class="w-3 h-3 rounded-full bg-secondary-fixed-dim inline-block"></span>
+<span class="w-3 h-3 rounded-full bg-tertiary-fixed inline-block"></span>
+<span class="text-data-mono text-on-surface-variant ml-2">REGION: PUNE-BHIMA BASIN</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container px-2.5 py-1 rounded text-data-mono">
+<span class="material-symbols-outlined text-sm text-primary">my_location</span>
+<span>18.52°N, 73.85°E</span>
+</div>
+</div>
+<!-- Simulated 3D Tilted Topo Canvas -->
+<div class="relative h-80 md:h-96 rounded-lg overflow-hidden bg-surface-container-low border border-outline-variant/20">
+<div class="absolute inset-0 bg-cover bg-center transform perspective-1000 rotate-x-6 scale-105 filter contrast-110" data-alt="An advanced satellite 3D topographic relief map of a lush Indian river basin showing winding river channels, check dam reservoirs, contour lines, and geo-tagged marker pins in high fidelity photorealistic style." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB52AdxJ9bDtO2jdI_S3lDMB73Bc_FlN__ymkpbLyK6NcgSJvGYBREnPnb58j_9TkQlaEb3_Vf9BZD5BQtAcXtN2KnIPmM9AjAFZdQ9tDaCXQMnvg61q_LwRjD_YhYJdBC7oi-titi1JNN4HBFm6hFcUTxYiue_cVw1U7Jqmrvs5yJ-U1yyypSygJZ2TGFZSTA49llR7G_4awJXIVydzNwnh21GCoBRXj1uId6EmJJo9mzvreaphTi-7Q')"></div>
+<!-- Gradient Overlay for Depth -->
+<div class="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent"></div>
+<!-- Interactive Check-dam Marker Pins -->
+<div class="absolute top-1/4 left-1/3 animate-bounce">
+<div class="bg-primary-container text-on-primary p-2 rounded-full shadow-lg flex items-center justify-center border-2 border-surface cursor-pointer">
+<span class="material-symbols-outlined text-sm">waves</span>
+</div>
+<div class="absolute top-10 left-1/2 transform -translate-x-1/2 bg-surface/90 text-on-surface px-2 py-0.5 rounded text-data-mono shadow border border-outline-variant/30 whitespace-nowrap">
+                  Check-Dam #4 (Active)
+                </div>
+</div>
+<div class="absolute top-1/2 right-1/4">
+<div class="bg-secondary text-on-secondary p-2 rounded-full shadow-lg flex items-center justify-center border-2 border-surface cursor-pointer">
+<span class="material-symbols-outlined text-sm">photo_camera</span>
+</div>
+<div class="absolute top-10 left-1/2 transform -translate-x-1/2 bg-surface/90 text-on-surface px-2 py-0.5 rounded text-data-mono shadow border border-outline-variant/30 whitespace-nowrap">
+                  GPS Photo Verified
+                </div>
+</div>
+<!-- Floating Glass Cards inside Map -->
+<div class="absolute bottom-4 left-4 right-4 grid grid-cols-3 gap-2">
+<div class="glass-card p-2.5 rounded text-center">
+<div class="text-data-mono text-on-surface-variant">Impact Score</div>
+<div class="font-headline-md text-primary-container">78/100</div>
+</div>
+<div class="glass-card p-2.5 rounded text-center">
+<div class="text-data-mono text-on-surface-variant">Water Spread</div>
+<div class="font-headline-md text-secondary">+24%</div>
+</div>
+<div class="glass-card p-2.5 rounded text-center">
+<div class="text-data-mono text-on-surface-variant">Vegetation</div>
+<div class="font-headline-md text-tertiary-container">+18%</div>
+</div>
+</div>
+</div>
+<!-- Map Action Toolbar -->
+<div class="flex items-center justify-between mt-4 pt-3 border-t border-outline-variant/20">
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded bg-primary-container text-on-primary text-data-mono font-data-mono flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">layers</span> Layers
+                </button>
+<button class="px-3 py-1.5 rounded bg-surface-container text-on-surface text-data-mono font-data-mono hover:bg-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">compare</span> Split View
+                </button>
+</div>
+<div class="text-data-mono text-on-surface-variant">
+                SENTINEL-2 / ISRO BHUVAN
+              </div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Problem & Context Section -->
+<section class="py-20 bg-surface-container-low border-y border-outline-variant/20 px-gutter">
+<div class="max-w-7xl mx-auto">
+<div class="text-center max-w-2xl mx-auto mb-16">
+<span class="text-data-mono text-primary font-data-mono uppercase tracking-wider mb-2 block">The Watershed Challenge</span>
+<h2 class="font-headline-lg text-on-background">Why Traditional Monitoring Falls Short</h2>
+<p class="text-on-surface-variant mt-3">Manual reporting workflows introduce verification bottlenecks and hinder timely resource allocation across rural districts.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Card 1 -->
+<div class="bg-surface p-8 rounded-xl border border-outline-variant/30 shadow-sm relative overflow-hidden group hover:border-primary transition-all">
+<div class="w-12 h-12 rounded bg-error-container text-on-error-container flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-2xl">edit_off</span>
+</div>
+<h3 class="font-headline-sm text-on-background mb-3">Manual &amp; Delayed Reporting</h3>
+<p class="text-body-md text-on-surface-variant">Paper logs and fragmented spreadsheets delay progress updates by weeks, making it impossible to respond dynamically to monsoon anomalies.</p>
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-error transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface p-8 rounded-xl border border-outline-variant/30 shadow-sm relative overflow-hidden group hover:border-primary transition-all">
+<div class="w-12 h-12 rounded bg-surface-container-high text-on-surface flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-2xl">no_photography</span>
+</div>
+<h3 class="font-headline-sm text-on-background mb-3">Lack of Verifiable Field Evidence</h3>
+<p class="text-body-md text-on-surface-variant">Without cryptographically secured geo-tagged photos and sensor feeds, verifying the physical construction of check-dams and contour trenches remains subjective.</p>
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-secondary transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface p-8 rounded-xl border border-outline-variant/30 shadow-sm relative overflow-hidden group hover:border-primary transition-all">
+<div class="w-12 h-12 rounded bg-surface-container-high text-on-surface flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-2xl">history_toggle_off</span>
+</div>
+<h3 class="font-headline-sm text-on-background mb-3">Absence of Time-Series Insights</h3>
+<p class="text-body-md text-on-surface-variant">Evaluating ecological restoration requires continuous multi-year spectral analysis that manual site visits simply cannot provide.</p>
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-primary-container transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Core Capabilities Bento Grid -->
+<section class="py-24 px-gutter" id="capabilities">
+<div class="max-w-7xl mx-auto">
+<div class="text-center max-w-2xl mx-auto mb-16">
+<span class="text-data-mono text-primary font-data-mono uppercase tracking-wider mb-2 block">Enterprise Architecture</span>
+<h2 class="font-headline-lg text-on-background">Core Platform Capabilities</h2>
+<p class="text-on-surface-variant mt-3">Built specifically for SIH26015 to unify multi-source satellite telemetry with ground-level accountability.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Bento Item 1: Large Span -->
+<div class="md:col-span-2 bg-surface-container-low p-8 rounded-xl border border-outline-variant/30 flex flex-col justify-between relative overflow-hidden group">
+<div class="absolute right-0 top-0 w-1/2 h-full opacity-10 bg-cover bg-center pointer-events-none" data-alt="Abstract satellite raster texture map overlay with contour lines and telemetry coordinates." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuATtvURc2p14WM54IvJr5LKY9UfWIk7jracJeXuZya7-u3WXajPBiJ84YxebDWXIXZfpGZZjdXcIUlrLyKUiP8OFhpa_qfiUxrBDxuhplQt3sTkPPmgRyipGAlUWBsVJWBlJl-Sc9X9rIpCdI0xPTA1Ln6R7z-Cm_RNbOZDYl76NJPTGYTNl3lKn5F2POO8XKV5gzdSiOBj0tZ5LUSqceOdH3N2SX3rIWWPWnuZAaISgEW5-ATMzSGGCQ')"></div>
+<div class="max-w-lg z-10">
+<div class="w-10 h-10 rounded bg-primary-container text-on-primary flex items-center justify-center mb-6">
+<span class="material-symbols-outlined">satellite</span>
+</div>
+<h3 class="font-headline-md text-on-background mb-3">High-Resolution Satellite Imagery Integration</h3>
+<p class="text-body-md text-on-surface-variant mb-6">Seamless integration with ISRO Bhuvan, Sentinel-2, and Landsat feeds providing continuous 5-day revisit spectral indices (NDVI, NDWI) for moisture and vegetative monitoring.</p>
+</div>
+<div class="flex items-center gap-3 z-10">
+<span class="px-3 py-1 rounded bg-surface text-data-mono font-data-mono border border-outline-variant/40">Multi-Spectral</span>
+<span class="px-3 py-1 rounded bg-surface text-data-mono font-data-mono border border-outline-variant/40">5m Resolution</span>
+</div>
+</div>
+<!-- Bento Item 2 -->
+<div class="bg-surface-container-low p-8 rounded-xl border border-outline-variant/30 flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded bg-secondary text-on-secondary flex items-center justify-center mb-6">
+<span class="material-symbols-outlined">map</span>
+</div>
+<h3 class="font-headline-sm text-on-background mb-3">GIS Layer Management</h3>
+<p class="text-body-md text-on-surface-variant">Toggle hydrological boundaries, drainage networks, soil permeability maps, and cadastral plots instantly.</p>
+</div>
+<div class="mt-6 text-data-mono text-primary font-semibold flex items-center gap-1">
+              Explore Layers <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</div>
+</div>
+<!-- Bento Item 3 -->
+<div class="bg-surface-container-low p-8 rounded-xl border border-outline-variant/30 flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded bg-tertiary-container text-on-tertiary flex items-center justify-center mb-6">
+<span class="material-symbols-outlined">photo_camera</span>
+</div>
+<h3 class="font-headline-sm text-on-background mb-3">Geo-Tagged Field Evidence</h3>
+<p class="text-body-md text-on-surface-variant">Tamper-proof mobile app uploads capture EXIF data, timestamp, and precise GPS coordinates for completed works.</p>
+</div>
+<div class="mt-6 text-data-mono text-primary font-semibold flex items-center gap-1">
+              Mobile Workflow <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</div>
+</div>
+<!-- Bento Item 4 -->
+<div class="md:col-span-2 bg-surface-container-low p-8 rounded-xl border border-outline-variant/30 flex flex-col justify-between relative overflow-hidden">
+<div class="max-w-lg">
+<div class="w-10 h-10 rounded bg-primary-container text-on-primary flex items-center justify-center mb-6">
+<span class="material-symbols-outlined">neurology</span>
+</div>
+<h3 class="font-headline-md text-on-background mb-3">AI-Powered Change Detection</h3>
+<p class="text-body-md text-on-surface-variant mb-6">Deep learning semantic segmentation automatically flags unauthorized construction, monitors siltation levels in check-dams, and measures water spread expansion.</p>
+</div>
+<div class="flex items-center gap-3">
+<span class="px-3 py-1 rounded bg-surface text-data-mono font-data-mono border border-outline-variant/40">TensorFlow / PyTorch</span>
+<span class="px-3 py-1 rounded bg-surface text-data-mono font-data-mono border border-outline-variant/40">Automated Alerts</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- How It Works Section -->
+<section class="py-24 bg-surface-container-low border-y border-outline-variant/20 px-gutter" id="how-it-works">
+<div class="max-w-7xl mx-auto">
+<div class="text-center max-w-2xl mx-auto mb-16">
+<span class="text-data-mono text-primary font-data-mono uppercase tracking-wider mb-2 block">Operational Pipeline</span>
+<h2 class="font-headline-lg text-on-background">How JalDrishti Works</h2>
+<p class="text-on-surface-variant mt-3">A streamlined 5-step workflow bridging macro satellite intelligence with micro-level field verification.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-5 gap-6">
+<!-- Step 1 -->
+<div class="bg-surface p-6 rounded-xl border border-outline-variant/30 relative">
+<div class="text-data-mono text-primary font-bold mb-4">STEP 01</div>
+<h3 class="font-headline-sm text-on-background mb-2">Ingest Data</h3>
+<p class="text-body-sm text-on-surface-variant">Automated ingestion of ISRO, Sentinel, and meteorological datasets.</p>
+</div>
+<!-- Step 2 -->
+<div class="bg-surface p-6 rounded-xl border border-outline-variant/30 relative">
+<div class="text-data-mono text-primary font-bold mb-4">STEP 02</div>
+<h3 class="font-headline-sm text-on-background mb-2">Map Watershed</h3>
+<p class="text-body-sm text-on-surface-variant">Delineation of micro-watersheds and drainage networks using DEM grids.</p>
+</div>
+<!-- Step 3 -->
+<div class="bg-surface p-6 rounded-xl border border-outline-variant/30 relative">
+<div class="text-data-mono text-primary font-bold mb-4">STEP 03</div>
+<h3 class="font-headline-sm text-on-background mb-2">Capture Evidence</h3>
+<p class="text-body-sm text-on-surface-variant">Field officers upload geo-tagged photographic proof of structural works.</p>
+</div>
+<!-- Step 4 -->
+<div class="bg-surface p-6 rounded-xl border border-outline-variant/30 relative">
+<div class="text-data-mono text-primary font-bold mb-4">STEP 04</div>
+<h3 class="font-headline-sm text-on-background mb-2">AI Change Detection</h3>
+<p class="text-body-sm text-on-surface-variant">Neural networks compare baseline vs current imagery for impact verification.</p>
+</div>
+<!-- Step 5 -->
+<div class="bg-surface p-6 rounded-xl border border-outline-variant/30 relative">
+<div class="text-data-mono text-primary font-bold mb-4">STEP 05</div>
+<h3 class="font-headline-sm text-on-background mb-2">Impact Report</h3>
+<p class="text-body-sm text-on-surface-variant">Comprehensive automated scorecards generated for government auditing.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Interactive Before/After Slider Section -->
+<section class="py-24 px-gutter">
+<div class="max-w-7xl mx-auto">
+<div class="text-center max-w-2xl mx-auto mb-16">
+<span class="text-data-mono text-primary font-data-mono uppercase tracking-wider mb-2 block">Spectral Verification</span>
+<h2 class="font-headline-lg text-on-background">Interactive Before &amp; After Analysis</h2>
+<p class="text-on-surface-variant mt-3">Slide to compare watershed condition before check-dam construction vs post-monsoon water accumulation.</p>
+</div>
+<div class="max-w-4xl mx-auto bg-surface-container-low rounded-xl p-4 md:p-6 border border-outline-variant/30 shadow-lg">
+<div class="relative h-96 rounded-lg overflow-hidden select-none" id="slider-container">
+<!-- After Image (Base) -->
+<div class="absolute inset-0 bg-cover bg-center" data-alt="High-resolution satellite image of a thriving watershed area with full green vegetation cover, brimming water reservoir behind a concrete check-dam, and healthy agricultural fields." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDr35QzYE-x2YQvkEU32js2T0sdi4083qK6nIsC8-2gKJTvaw33D0xHJUjRlKfYVC_S_q_0uzTR6WY_UyOHRdkrI8ZbEUMZpZbg630_K-2qN8qPIeTcubqbHxXv4RGcdr6UX0PWDR4o5zwEOdOKtkrrtS2EBDwEe8aLZ_qzj2W2hNdBP4ezRoUyXUzwYbOLvAA3AHF56AW8x_kstAfRUMEz4CcEYnYZ_R20CZuit_QgLag5kwDVhGpv0A')"></div>
+<div class="absolute bottom-4 right-4 bg-primary-container text-on-primary px-3 py-1 rounded text-data-mono font-data-mono">
+              AFTER (Oct 2025 - Post Monsoon)
+            </div>
+<!-- Before Image (Overlay with clipping) -->
+<div class="absolute inset-0 bg-cover bg-center overflow-hidden" data-alt="High-resolution satellite image of an arid, dry riverbed before watershed intervention with sparse vegetation and dry soil conditions." id="before-layer" style="width: 50%; background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCgL00lyLf7YD3xIR7RZ8bdcs8V_xLIGL3QQUy6BppNfnWM0v3txGBdnu0uZTJ1fAtHQcjkXjxKc9MtKmfO0ghF9eR-NuE5gP8ULvLD0g-8-HFdPN_jZ__LjjY07ZlH0I9d_rH1CZ6wPPpVUGh6C_MRBYK_idyJdzpUf9FRNgQoOWr8oim-Qnnto1x8V5TbH6LcuPDPxW6yjA0X-EFJE_De6Dqkz-ULqDrd8rzz1W3lWI2qyeEsxEQJwQ')"></div>
+<div class="absolute bottom-4 left-4 bg-inverse-surface text-inverse-on-surface px-3 py-1 rounded text-data-mono font-data-mono" id="before-label">
+              BEFORE (May 2025 - Pre Monsoon)
+            </div>
+<!-- Slider Line -->
+<div class="absolute top-0 bottom-0 w-1 bg-secondary cursor-ew-resize" id="slider-handle" style="left: 50%;">
+<div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-secondary text-on-secondary flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-sm">swap_horiz</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-4 mt-6 text-center">
+<div class="bg-surface p-3 rounded border border-outline-variant/30">
+<div class="text-data-mono text-on-surface-variant">Water Body Index</div>
+<div class="font-headline-md text-secondary">+312%</div>
+</div>
+<div class="bg-surface p-3 rounded border border-outline-variant/30">
+<div class="text-data-mono text-on-surface-variant">Soil Moisture</div>
+<div class="font-headline-md text-primary-container">+45%</div>
+</div>
+<div class="bg-surface p-3 rounded border border-outline-variant/30">
+<div class="text-data-mono text-on-surface-variant">Erosion Risk</div>
+<div class="font-headline-md text-tertiary-container">-62%</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Field Officer Workflow & Dashboard Preview -->
+<section class="py-24 bg-surface-container-low border-t border-outline-variant/20 px-gutter">
+<div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+<!-- Left: Field Officer Phone Mockup -->
+<div class="flex justify-center">
+<div class="w-full max-w-xs bg-inverse-surface rounded-[2.5rem] p-4 shadow-2xl border-4 border-outline-variant/40 relative">
+<div class="w-32 h-4 bg-outline/40 rounded-full mx-auto mb-4"></div>
+<div class="bg-surface rounded-2xl p-4 h-[450px] overflow-hidden flex flex-col justify-between border border-outline-variant/30">
+<div>
+<div class="flex justify-between items-center mb-4">
+<span class="text-data-mono font-bold text-primary-container">JalDrishti Mobile</span>
+<span class="material-symbols-outlined text-sm text-secondary">gps_fixed</span>
+</div>
+<div class="bg-surface-container p-3 rounded-lg mb-4">
+<div class="text-data-mono text-on-surface-variant">LAT/LONG: 18.5204° N, 73.8567° E</div>
+<div class="text-data-mono font-semibold text-on-background mt-1">Site: Percolation Tank #12</div>
+</div>
+<div class="h-40 rounded-lg overflow-hidden mb-4 bg-surface-container-high relative">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Close up smartphone camera viewfinder screen showing a completed stone check dam structure in a rural valley with GPS metadata watermark." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCaRYztIajTrq1i7x9U3g8M-BPkQZcKQsM54hud94HrjV7bf_h75m6NweZcGk195Pz4aBDWi2a8vy30odDYfpioKGQawW9AgjkcanrA01eaRg3ntCAFP1TNN0L62wR5-KljqJn55C412QV955rSkiuwmS7k6VhpM_qGA1EyC1txZcyiPMDdCkAEx2mf4Jg178bMAySD8fn_b3PWiGBPij7jx77oTBwZaxTZIyrq9VwsCBqZM3e_jevvlg')"></div>
+<div class="absolute bottom-2 left-2 bg-primary text-on-primary px-2 py-0.5 rounded text-data-mono">EXIF Verified</div>
+</div>
+</div>
+<button class="w-full py-2.5 bg-primary-container text-on-primary rounded font-label-md text-center">
+                Upload Encrypted Proof
+              </button>
+</div>
+<div class="w-24 h-1 bg-outline/40 rounded-full mx-auto mt-4"></div>
+</div>
+</div>
+<!-- Right: Dashboard Preview -->
+<div class="flex flex-col gap-6">
+<span class="text-data-mono text-primary font-data-mono uppercase tracking-wider">Command Center</span>
+<h2 class="font-headline-lg text-on-background">Real-Time Analytics &amp; Decision Support</h2>
+<p class="text-body-lg text-on-surface-variant">
+            Centralized dashboards give district collectors and state planners immediate visibility into fund utilization, completion rates, and ecological recovery indices across thousands of watershed sites.
+          </p>
+<ul class="space-y-3">
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary">check_circle</span>
+<span class="font-medium text-on-background">Automated discrepancy alerts between satellite telemetry and field logs</span>
+</li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary">check_circle</span>
+<span class="font-medium text-on-background">Predictive hydrological modeling based on rainfall forecasts</span>
+</li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary">check_circle</span>
+<span class="font-medium text-on-background">Exportable audit-ready reports for government stakeholders</span>
+</li>
+</ul>
+</div>
+</div>
+</section>
+<!-- Who It's For Section -->
+<section class="py-24 px-gutter">
+<div class="max-w-7xl mx-auto">
+<div class="text-center max-w-2xl mx-auto mb-16">
+<span class="text-data-mono text-primary font-data-mono uppercase tracking-wider mb-2 block">Stakeholder Ecosystem</span>
+<h2 class="font-headline-lg text-on-background">Built for Every Tier of Governance</h2>
+<p class="text-on-surface-variant mt-3">Tailored interfaces and workflows designed for distinct operational requirements.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/30">
+<div class="w-10 h-10 rounded bg-primary-container text-on-primary flex items-center justify-center mb-4">
+<span class="material-symbols-outlined">account_balance</span>
+</div>
+<h3 class="font-headline-sm text-on-background mb-2">Government Officials</h3>
+<p class="text-body-sm text-on-surface-variant">District collectors and ministry heads monitor macro fund deployment and district-wide impact metrics.</p>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/30">
+<div class="w-10 h-10 rounded bg-secondary text-on-secondary flex items-center justify-center mb-4">
+<span class="material-symbols-outlined">design_services</span>
+</div>
+<h3 class="font-headline-sm text-on-background mb-2">Watershed Planners</h3>
+<p class="text-body-sm text-on-surface-variant">Engineers and hydrologists utilize DEM and flow accumulation models to site check-dams optimally.</p>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/30">
+<div class="w-10 h-10 rounded bg-tertiary-container text-on-tertiary flex items-center justify-center mb-4">
+<span class="material-symbols-outlined">science</span>
+</div>
+<h3 class="font-headline-sm text-on-background mb-2">Researchers</h3>
+<p class="text-body-sm text-on-surface-variant">Academics and ecologists access multi-spectral raster archives for longitudinal climate studies.</p>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/30">
+<div class="w-10 h-10 rounded bg-surface-container-high text-on-surface flex items-center justify-center mb-4">
+<span class="material-symbols-outlined">engineering</span>
+</div>
+<h3 class="font-headline-sm text-on-background mb-2">Field Officers</h3>
+<p class="text-body-sm text-on-surface-variant">Ground inspectors capture tamper-proof geo-tagged media and verify physical construction milestones.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Impact Metrics Section -->
+<section class="py-20 bg-primary-container text-on-primary px-gutter" id="impact">
+<div class="max-w-7xl mx-auto text-center">
+<span class="text-data-mono text-inverse-primary font-data-mono uppercase tracking-wider mb-2 block">Quantifiable Results</span>
+<h2 class="font-headline-lg text-white mb-16">Impacting Rural Ecosystems at Scale</h2>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+<div>
+<div class="font-headline-xl text-inverse-primary mb-2">1,420+</div>
+<div class="text-data-mono text-on-primary-container">Watersheds Managed</div>
+</div>
+<div>
+<div class="font-headline-xl text-inverse-primary mb-2">45Mha</div>
+<div class="text-data-mono text-on-primary-container">Total Area Monitored</div>
+</div>
+<div>
+<div class="font-headline-xl text-inverse-primary mb-2">312%</div>
+<div class="text-data-mono text-on-primary-container">Water Storage Increase</div>
+</div>
+<div>
+<div class="font-headline-xl text-inverse-primary mb-2">99.4%</div>
+<div class="text-data-mono text-on-primary-container">Verification Accuracy</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Data Sources & Tech Stack -->
+<section class="py-24 px-gutter">
+<div class="max-w-7xl mx-auto">
+<div class="text-center max-w-2xl mx-auto mb-16">
+<span class="text-data-mono text-primary font-data-mono uppercase tracking-wider mb-2 block">Robust Foundation</span>
+<h2 class="font-headline-lg text-on-background">Data Sources &amp; Technology Stack</h2>
+<p class="text-on-surface-variant mt-3">Powered by open geospatial standards and cutting-edge artificial intelligence frameworks.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-4">
+<span class="px-4 py-2 rounded-full bg-surface-container-low border border-outline-variant/30 text-data-mono font-data-mono">ISRO Bhuvan API</span>
+<span class="px-4 py-2 rounded-full bg-surface-container-low border border-outline-variant/30 text-data-mono font-data-mono">Sentinel-2 Multispectral</span>
+<span class="px-4 py-2 rounded-full bg-surface-container-low border border-outline-variant/30 text-data-mono font-data-mono">Google Earth Engine</span>
+<span class="px-4 py-2 rounded-full bg-surface-container-low border border-outline-variant/30 text-data-mono font-data-mono">PyTorch / TensorFlow</span>
+<span class="px-4 py-2 rounded-full bg-surface-container-low border border-outline-variant/30 text-data-mono font-data-mono">PostGIS Spatial DB</span>
+<span class="px-4 py-2 rounded-full bg-surface-container-low border border-outline-variant/30 text-data-mono font-data-mono">Mapbox GL JS</span>
+</div>
+</div>
+</section>
+<!-- Final CTA Band -->
+<section class="py-20 bg-gradient-to-r from-primary-container via-tertiary-container to-primary text-on-primary px-gutter text-center" id="demo">
+<div class="max-w-3xl mx-auto">
+<h2 class="font-headline-xl text-white mb-6">Ready to Transform Watershed Monitoring in Your State?</h2>
+<p class="text-body-lg text-on-primary-container mb-8">Join the Smart India Hackathon 2026 movement towards transparent, AI-driven ecological stewardship.</p>
+<div class="flex flex-wrap justify-center gap-4">
+<a class="px-8 py-4 bg-inverse-surface text-inverse-on-surface rounded font-label-md text-base hover:bg-surface hover:text-on-surface transition-all" href="#">
+            Launch Platform Demo
+          </a>
+<a class="px-8 py-4 bg-surface/10 text-white rounded font-label-md text-base hover:bg-surface/20 transition-all border border-white/20" href="#">
+            Contact SIH Team
+          </a>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low dark:bg-inverse-surface w-full border-t border-outline-variant/25">
+<div class="max-w-7xl mx-auto px-gutter py-space-xl flex flex-col md:flex-row justify-between items-center gap-space-md">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary-container flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-lg">water_drop</span>
+</div>
+<span class="text-headline-sm font-headline-sm font-bold text-primary dark:text-inverse-primary">JalDrishti</span>
+</div>
+<div class="text-data-mono text-on-surface-variant dark:text-surface-variant text-center">
+        © 2026 JalDrishti. All rights reserved. SIH26015 Water Resource Intelligence System.
+      </div>
+<div class="flex items-center gap-6">
+<a class="text-body-sm text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-body-sm text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary transition-colors" href="#">Terms of Service</a>
+<a class="text-body-sm text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary transition-colors" href="#">API Docs</a>
+</div>
+</div>
+</footer>
+<script>
+    // Mobile menu toggle
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    if(mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+      });
+    }
+
+    // Interactive Before/After Slider
+    const sliderContainer = document.getElementById('slider-container');
+    const beforeLayer = document.getElementById('before-layer');
+    const sliderHandle = document.getElementById('slider-handle');
+
+    if(sliderContainer && beforeLayer && sliderHandle) {
+      let isDragging = false;
+
+      const updateSlider = (clientX) => {
+        const rect = sliderContainer.getBoundingClientRect();
+        let x = clientX - rect.left;
+        if(x < 0) x = 0;
+        if(x > rect.width) x = rect.width;
+        const percentage = (x / rect.width) * 100;
+        beforeLayer.style.width = percentage + '%';
+        sliderHandle.style.left = percentage + '%';
+      };
+
+      sliderContainer.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        updateSlider(e.clientX);
+      });
+
+      window.addEventListener('mouseup', () => {
+        isDragging = false;
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if(!isDragging) return;
+        updateSlider(e.clientX);
+      });
+
+      sliderContainer.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        updateSlider(e.touches[0].clientX);
+      });
+
+      window.addEventListener('touchend', () => {
+        isDragging = false;
+      });
+
+      window.addEventListener('touchmove', (e) => {
+        if(!isDragging) return;
+        updateSlider(e.touches[0].clientX);
+      });
+    }
+  </script>
+</body></html>

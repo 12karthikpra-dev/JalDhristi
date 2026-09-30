@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JalDrishti - AI-Powered Geospatial Watershed Development & Monitoring Platform</title>
+  <meta name="description" content="AI and satellite-powered geospatial watershed intelligence platform for government planners, hydrologists, and field officers."/>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: 'var(--color-primary)',
+            'primary-container': 'var(--color-primary-container)',
+            'on-primary': 'var(--color-on-primary)',
+            secondary: 'var(--color-secondary)',
+            'secondary-container': 'var(--color-secondary-container)',
+            tertiary: 'var(--color-tertiary)',
+            'tertiary-container': 'var(--color-tertiary-container)',
+            background: 'var(--color-bg)',
+            surface: 'var(--color-surface)',
+            'surface-container': 'var(--color-surface-container)',
+            'surface-container-high': 'var(--color-surface-container-high)',
+            'on-background': 'var(--color-text-main)',
+            'on-surface-variant': 'var(--color-text-muted)',
+            'outline-custom': 'var(--color-outline)'
+          },
+          fontFamily: {
+            headline: ['var(--font-headline)', 'sans-serif'],
+            body: ['var(--font-body)', 'sans-serif'],
+            mono: ['var(--font-mono)', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css"/>
+
+  <!-- Leaflet JS & Chart.js -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- OpenFreeMap (MapLibre GL Vector Tiles Engine) -->
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css"/>
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.21/leaflet-maplibre-gl.js"></script>
+</head>
+<body class="selection:bg-blue-600 selection:text-white transition-colors duration-200">
+
+  <!-- Fullscreen Video Landing Screen (Plays first for 4 seconds, then smoothly reveals the platform) -->
+  <div id="landing-video-screen">
+    <video id="landing-video-player" class="w-full h-full object-cover" autoplay muted playsinline preload="auto">
+      <source src="intro.mp4" type="video/mp4" />
+      Your browser does not support HTML5 video playback.
+    </video>
+    
+    <!-- Clean, minimal skip button in top right -->
+    <div class="absolute top-6 right-6 z-10">
+      <button id="btn-skip-landing-video" class="px-4 py-2 rounded-full bg-black/40 hover:bg-black/60 text-white text-xs font-mono backdrop-blur-md border border-white/20 transition-all duration-200 active:scale-95 flex items-center gap-1.5 cursor-pointer">
+        <span>Skip to Platform</span>
+        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-50 glass-panel border-b border-gray-200/50 dark:border-gray-800/80 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand -->
+      <div class="flex items-center gap-3">
+        <a href="#view-home" data-view-target="view-home" class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-lg bg-blue-700 text-white flex items-center justify-center shadow-md">
+            <span class="material-symbols-outlined text-2xl">water_drop</span>
+          </div>
+          <div>
+            <span class="font-headline font-bold text-xl tracking-tight text-gray-900 dark:text-white">JalDrishti</span>
+            <span class="text-[10px] text-gray-500 font-medium block -mt-0.5">Geospatial Watershed Platform</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Main Navigation Menu -->
+      <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+        <a href="#view-home" data-view-target="view-home" class="py-1 transition-colors text-primary font-bold border-b-2 border-primary">
+          Platform
+        </a>
+        <a href="#view-map" data-view-target="view-map" class="py-1 transition-colors text-on-surface-variant hover:text-gray-900 dark:hover:text-white flex items-center gap-1">
+          <span class="material-symbols-outlined text-base">map</span> GIS Explorer
+        </a>
+        <a href="#view-evidence" data-view-target="view-evidence" class="py-1 transition-colors text-on-surface-variant hover:text-gray-900 dark:hover:text-white flex items-center gap-1">
+          <span class="material-symbols-outlined text-base">photo_camera</span> Field Evidence
+        </a>
+        <a href="#view-analytics" data-view-target="view-analytics" class="py-1 transition-colors text-on-surface-variant hover:text-gray-900 dark:hover:text-white flex items-center gap-1">
+          <span class="material-symbols-outlined text-base">insights</span> Analytics
+        </a>
+        <a href="#view-telemetry" data-view-target="view-telemetry" class="py-1 transition-colors text-on-surface-variant hover:text-gray-900 dark:hover:text-white flex items-center gap-1">
+          <span class="material-symbols-outlined text-base">folder_shared</span> Recent Case Studies
+        </a>
+        <a href="#view-about" data-view-target="view-about" class="py-1 transition-colors text-on-surface-variant hover:text-gray-900 dark:hover:text-white flex items-center gap-1">
+          <span class="material-symbols-outlined text-base">info</span> About Us
+        </a>
+      </nav>
+
+      <!-- Right Controls: Theme Toggle & CTA -->
+      <div class="flex items-center gap-3">
+        <!-- Dark/Light Mode Button -->
+        <button id="btn-toggle-dark-mode" class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition" title="Toggle Dark/Light Mode">
+          <span class="material-symbols-outlined text-xl" id="dark-mode-icon">dark_mode</span>
+        </button>
+
+        <!-- Launch GIS Map CTA -->
+        <a href="#view-map" data-view-target="view-map" class="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs shadow transition active:scale-98">
+          <span class="material-symbols-outlined text-sm">explore</span>
+          Launch Map
+        </a>
+
+        <!-- Mobile Menu Hamburger -->
+        <button id="mobile-menu-btn" class="md:hidden p-2 text-gray-700 dark:text-gray-200">
+          <span class="material-symbols-outlined text-2xl">menu</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobile-dropdown-menu" class="hidden md:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 space-y-2 text-sm">
+      <a href="#view-home" data-view-target="view-home" class="block py-2 text-gray-700 dark:text-gray-200 font-medium">Platform Overview</a>
+      <a href="#view-map" data-view-target="view-map" class="block py-2 text-gray-700 dark:text-gray-200 font-medium">GIS Map Explorer</a>
+      <a href="#view-evidence" data-view-target="view-evidence" class="block py-2 text-gray-700 dark:text-gray-200 font-medium">Field Officer Evidence</a>
+      <a href="#view-analytics" data-view-target="view-analytics" class="block py-2 text-gray-700 dark:text-gray-200 font-medium">Executive Analytics</a>
+      <a href="#view-telemetry" data-view-target="view-telemetry" class="block py-2 text-gray-700 dark:text-gray-200 font-medium">Recent Case Studies & Telemetry</a>
+      <a href="#view-about" data-view-target="view-about" class="block py-2 text-gray-700 dark:text-gray-200 font-medium">About Us & Vision</a>
+    </div>
+  </header>
+
+  <!-- MAIN APP CONTAINER (SPA Views) -->
+  <main>
+
+    <!-- ========================================== -->
+    <!-- VIEW 1: HOME / LANDING & SHOWCASE          -->
+    <!-- ========================================== -->
+    <section id="view-home" class="view-container active">
+      <!-- Hero Section -->
+      <div class="relative pt-12 pb-20 md:pt-20 md:pb-28 px-4 sm:px-6 lg:px-8 topo-grid border-b border-gray-200/50 dark:border-gray-800/80">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          <!-- Left Column -->
+          <div class="lg:col-span-6 flex flex-col gap-6 z-10">
+            <div class="inline-flex items-center gap-2 self-start px-3.5 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-200 text-xs font-mono shadow-xs">
+              <span class="material-symbols-outlined text-sm text-blue-600">verified</span>
+              AI-Powered Geospatial Watershed Intelligence
+            </div>
+
+            <h1 class="font-headline text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 dark:text-white leading-[1.12]">
+              Transforming Watersheds with <span class="text-blue-600 dark:text-blue-400 italic underline decoration-blue-400 decoration-2 underline-offset-8">Geospatial Intelligence</span>.
+            </h1>
+
+            <p class="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-xl leading-relaxed">
+              An enterprise AI and satellite monitoring ecosystem empowering government stakeholders, watershed hydrologists, and field officers to design, verify, and scale sustainable watershed restoration.
+            </p>
+
+            <div class="flex flex-wrap items-center gap-4 pt-2">
+              <a href="#view-map" data-view-target="view-map" class="px-6 py-3.5 rounded-lg bg-emerald-800 hover:bg-emerald-900 text-white font-medium text-sm shadow-md flex items-center gap-2 transition active:scale-98">
+                <span>Explore Interactive GIS Map</span>
+                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+              </a>
+              <a href="#view-evidence" data-view-target="view-evidence" class="px-6 py-3.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium text-sm text-gray-800 dark:text-gray-200 transition">
+                Field Evidence Portal
+              </a>
+            </div>
+
+            <!-- Trust KPI Counters -->
+            <div class="pt-6 border-t border-gray-200 dark:border-gray-800 grid grid-cols-3 gap-4">
+              <div>
+                <div class="font-headline text-2xl sm:text-3xl font-bold text-emerald-800 dark:text-emerald-400">99.4%</div>
+                <div class="text-xs font-mono text-gray-500 mt-0.5">Verification Accuracy</div>
+              </div>
+              <div>
+                <div class="font-headline text-2xl sm:text-3xl font-bold text-emerald-800 dark:text-emerald-400">1,420+</div>
+                <div class="text-xs font-mono text-gray-500 mt-0.5">Watersheds Mapped</div>
+              </div>
+              <div>
+                <div class="font-headline text-2xl sm:text-3xl font-bold text-emerald-800 dark:text-emerald-400">45Mha</div>
+                <div class="text-xs font-mono text-gray-500 mt-0.5">Monitored Area</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Satellite Showcase Card -->
+          <div class="lg:col-span-6 relative">
+            <div class="glass-panel rounded-2xl p-5 md:p-6 shadow-2xl overflow-hidden border border-gray-200/80 dark:border-gray-700/80">
+              
+              <!-- Header Bar inside Card -->
+              <div class="flex justify-between items-center pb-3 mb-3 border-b border-gray-200 dark:border-gray-700 text-xs">
+                <div class="flex items-center gap-2">
+                  <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                  <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+                  <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+                  <span class="font-mono font-semibold text-gray-600 dark:text-gray-300 ml-1">REGION: PUNE-BHIMA BASIN</span>
+                </div>
+                <div class="flex items-center gap-1 font-mono text-gray-500">
+                  <span class="material-symbols-outlined text-sm text-emerald-600">my_location</span>
+                  <span>18.52° N, 73.85° E</span>
+                </div>
+              </div>
+
+              <!-- Satellite Canvas Container -->
+              <div class="relative h-80 md:h-96 rounded-xl overflow-hidden bg-gray-900 border border-gray-300 dark:border-gray-700">
+                
+                <!-- Satellite Video Stream (Revolving Earth Loop 0s-3s) -->
+                <video id="hero-orbit-video" class="w-full h-full object-cover" autoplay muted playsinline preload="auto">
+                  <source src="intro.mp4#t=0,3" type="video/mp4" />
+                </video>
+                
+                <!-- Subtle Gradient & Stream Badge -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 flex flex-col justify-between p-4 pointer-events-none">
+                  <div class="flex items-center justify-between">
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-mono border border-white/20">
+                      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                      <span>Real-Time Geospatial Stream</span>
+                    </div>
+                  </div>
+
+                  <div class="text-white text-xs font-mono font-medium drop-shadow flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm text-blue-400">satellite_alt</span>
+                    <span>Sentinel-2 / ISRO Bhuvan Multi-Spectral Orbit</span>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Map Card Clean Footer Toolbar -->
+              <div class="flex items-center justify-between mt-3 text-xs">
+                <span class="font-mono text-gray-500 text-[11px] flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                  <span>WATERSHED MONITORING SYSTEM</span>
+                </span>
+                <span class="font-mono text-gray-500 text-[11px]">SENTINEL-2 &middot; ISRO BHUVAN</span>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Problem & Challenge Section -->
+      <section class="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900/40 border-b border-gray-200/60 dark:border-gray-800/80">
+        <div class="max-w-7xl mx-auto">
+          <div class="text-center max-w-2xl mx-auto mb-14">
+            <span class="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest block mb-2">The Watershed Challenge</span>
+            <h2 class="font-headline text-3xl font-bold text-gray-900 dark:text-white">Why Traditional Monitoring Falls Short</h2>
+            <p class="text-gray-600 dark:text-gray-400 mt-3 text-sm sm:text-base">Manual reporting workflows introduce verification bottlenecks and hinder timely resource allocation across rural districts.</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white dark:bg-gray-800 p-7 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm relative overflow-hidden group hover:border-emerald-600 transition">
+              <div class="w-12 h-12 rounded-lg bg-red-100 dark:bg-red-950/50 text-red-700 flex items-center justify-center mb-5">
+                <span class="material-symbols-outlined text-2xl">edit_off</span>
+              </div>
+              <h3 class="font-headline text-lg font-bold text-gray-900 dark:text-white mb-2">Manual & Delayed Reporting</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">Paper logs and fragmented spreadsheets delay progress updates by weeks, making it impossible to respond dynamically to monsoon anomalies.</p>
+              <div class="absolute bottom-0 left-0 right-0 h-1 bg-red-500 scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 p-7 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm relative overflow-hidden group hover:border-emerald-600 transition">
+              <div class="w-12 h-12 rounded-lg bg-sky-100 dark:bg-sky-950/50 text-sky-700 flex items-center justify-center mb-5">
+                <span class="material-symbols-outlined text-2xl">no_photography</span>
+              </div>
+              <h3 class="font-headline text-lg font-bold text-gray-900 dark:text-white mb-2">Lack of Verifiable Field Evidence</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">Without cryptographically secured geo-tagged photos and sensor feeds, verifying the physical construction of check-dams and contour trenches remains subjective.</p>
+              <div class="absolute bottom-0 left-0 right-0 h-1 bg-sky-500 scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 p-7 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm relative overflow-hidden group hover:border-emerald-600 transition">
+              <div class="w-12 h-12 rounded-lg bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 flex items-center justify-center mb-5">
+                <span class="material-symbols-outlined text-2xl">history_toggle_off</span>
+              </div>
+              <h3 class="font-headline text-lg font-bold text-gray-900 dark:text-white mb-2">Absence of Time-Series Insights</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">Evaluating ecological restoration requires continuous multi-year spectral analysis that manual site visits simply cannot provide.</p>
+              <div class="absolute bottom-0 left-0 right-0 h-1 bg-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Interactive Before / After Satellite Comparison Slider -->
+      <section class="py-20 px-4 sm:px-6 lg:px-8 border-b border-gray-200/60 dark:border-gray-800/80">
+        <div class="max-w-7xl mx-auto">
+          <div class="text-center max-w-2xl mx-auto mb-12">
+            <span class="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest block mb-2">Spectral Verification</span>
+            <h2 class="font-headline text-3xl font-bold text-gray-900 dark:text-white">Interactive Before & After Analysis</h2>
+            <p class="text-gray-600 dark:text-gray-400 mt-2 text-sm">Slide to compare watershed condition before check-dam construction vs post-monsoon water accumulation.</p>
+          </div>
+
+          <div class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-6 border border-gray-200 dark:border-gray-700 shadow-xl">
+            <div class="relative h-80 sm:h-96 rounded-xl overflow-hidden select-none border border-gray-300 dark:border-gray-700" id="landing-slider-container">
+              <!-- After Image (Base) -->
+              <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDr35QzYE-x2YQvkEU32js2T0sdi4083qK6nIsC8-2gKJTvaw33D0xHJUjRlKfYVC_S_q_0uzTR6WY_UyOHRdkrI8ZbEUMZpZbg630_K-2qN8qPIeTcubqbHxXv4RGcdr6UX0PWDR4o5zwEOdOKtkrrtS2EBDwEe8aLZ_qzj2W2hNdBP4ezRoUyXUzwYbOLvAA3AHF56AW8x_kstAfRUMEz4CcEYnYZ_R20CZuit_QgLag5kwDVhGpv0A');"></div>
+              <div class="absolute bottom-3 right-3 bg-emerald-800 text-white px-3 py-1 rounded text-xs font-mono shadow">
+                AFTER (Oct 2025 - Post Monsoon Water Retention)
+              </div>
+
+              <!-- Before Image (Overlay clipped) -->
+              <div class="absolute inset-0 bg-cover bg-center overflow-hidden" id="landing-before-layer" style="width: 50%; background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCgL00lyLf7YD3xIR7RZ8bdcs8V_xLIGL3QQUy6BppNfnWM0v3txGBdnu0uZTJ1fAtHQcjkXjxKc9MtKmfO0ghF9eR-NuE5gP8ULvLD0g-8-HFdPN_jZ__LjjY07ZlH0I9d_rH1CZ6wPPpVUGh6C_MRBYK_idyJdzpUf9FRNgQoOWr8oim-Qnnto1x8V5TbH6LcuPDPxW6yjA0X-EFJE_De6Dqkz-ULqDrd8rzz1W3lWI2qyeEsxEQJwQ');"></div>
+              <div class="absolute bottom-3 left-3 bg-gray-900 text-white px-3 py-1 rounded text-xs font-mono shadow">
+                BEFORE (May 2025 - Pre Monsoon Arid Riverbed)
+              </div>
+
+              <!-- Slider Divider Handle -->
+              <div class="absolute top-0 bottom-0 w-1 bg-sky-500 cursor-ew-resize shadow-md" id="landing-slider-handle" style="left: 50%;">
+                <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-sky-600 text-white flex items-center justify-center shadow-lg border-2 border-white">
+                  <span class="material-symbols-outlined text-sm">swap_horiz</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Spectral Impact Metrics below slider -->
+            <div class="grid grid-cols-3 gap-3 mt-6 text-center text-xs">
+              <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div class="text-gray-500">Water Body Index</div>
+                <div class="font-headline text-xl font-bold text-sky-600 dark:text-sky-400 mt-1">+312%</div>
+              </div>
+              <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div class="text-gray-500">Soil Moisture Gain</div>
+                <div class="font-headline text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">+45%</div>
+              </div>
+              <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div class="text-gray-500">Erosion Risk Reduction</div>
+                <div class="font-headline text-xl font-bold text-emerald-700 dark:text-emerald-300 mt-1">-62%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Operational 5-Step Pipeline -->
+      <section class="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900/40 border-b border-gray-200/60 dark:border-gray-800/80">
+        <div class="max-w-7xl mx-auto">
+          <div class="text-center max-w-2xl mx-auto mb-14">
+            <span class="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest block mb-2">Operational Pipeline</span>
+            <h2 class="font-headline text-3xl font-bold text-gray-900 dark:text-white">How JalDrishti Works</h2>
+            <p class="text-gray-600 dark:text-gray-400 mt-2 text-sm">A 5-step operational pipeline connecting satellite intelligence with ground verification.</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div class="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700">
+              <span class="font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400 block mb-2">STEP 01</span>
+              <h4 class="font-headline font-bold text-sm text-gray-900 dark:text-white mb-1">Ingest Data</h4>
+              <p class="text-xs text-gray-600 dark:text-gray-400">ISRO Bhuvan, Sentinel-2, and precipitation telemetry feeds.</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700">
+              <span class="font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400 block mb-2">STEP 02</span>
+              <h4 class="font-headline font-bold text-sm text-gray-900 dark:text-white mb-1">Map Watershed</h4>
+              <p class="text-xs text-gray-600 dark:text-gray-400">DEM elevation flow accumulation delineates stream orders.</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700">
+              <span class="font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400 block mb-2">STEP 03</span>
+              <h4 class="font-headline font-bold text-sm text-gray-900 dark:text-white mb-1">Capture Evidence</h4>
+              <p class="text-xs text-gray-600 dark:text-gray-400">Ground officers upload tamper-proof EXIF tagged photos.</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700">
+              <span class="font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400 block mb-2">STEP 04</span>
+              <h4 class="font-headline font-bold text-sm text-gray-900 dark:text-white mb-1">AI Verification</h4>
+              <p class="text-xs text-gray-600 dark:text-gray-400">Deep learning segmentation computes siltation & water body expansion.</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700">
+              <span class="font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400 block mb-2">STEP 05</span>
+              <h4 class="font-headline font-bold text-sm text-gray-900 dark:text-white mb-1">Audit Scorecard</h4>
+              <p class="text-xs text-gray-600 dark:text-gray-400">Automated transparency reports for district collectors.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Final CTA Banner -->
+      <section class="py-16 px-4 bg-gradient-to-r from-emerald-900 via-emerald-800 to-sky-900 text-white text-center">
+        <div class="max-w-3xl mx-auto">
+          <h2 class="font-headline text-3xl font-bold mb-4">Ready to Explore Watershed Intelligence?</h2>
+          <p class="text-emerald-100 text-sm mb-6">Launch the full interactive GIS Map Explorer or verify field evidence directly.</p>
+          <div class="flex justify-center gap-3">
+            <a href="#view-map" data-view-target="view-map" class="px-6 py-3 rounded-lg bg-white text-emerald-900 font-bold text-xs hover:bg-gray-100 shadow transition">
+              Open Interactive GIS Map
+            </a>
+            <a href="#view-analytics" data-view-target="view-analytics" class="px-6 py-3 rounded-lg border border-white/30 text-white font-medium text-xs hover:bg-white/10 transition">
+              View Executive Analytics
+            </a>
+          </div>
+        </div>
+      </section>
+    </section>    <!-- ========================================== -->
+    <!-- VIEW 2: INTERACTIVE GIS WATERSHED MAP (FULLSCREEN BACKGROUND) -->
+    <!-- ========================================== -->
+    <section id="view-map" class="view-container relative w-full h-[calc(100vh-4rem)] min-h-[600px] overflow-hidden">
+      
+      <!-- Fullscreen Background Map Canvas -->
+      <div id="gis-map-canvas" class="absolute inset-0 w-full h-full z-0"></div>
+
+      <!-- Top Overlay Bar: Breadcrumbs, Siting Mode & Live Coordinates -->
+      <div class="absolute top-4 left-4 right-4 z-20 pointer-events-none flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2 pointer-events-auto glass-panel px-3.5 py-1.5 rounded-xl border border-white/30 dark:border-gray-700/80 shadow-lg text-xs backdrop-blur-md">
+          <span class="font-mono font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100/80 dark:bg-emerald-950/80 px-2 py-0.5 rounded">GIS COMMAND CENTER</span>
+          <span class="text-gray-400">&rsaquo;</span>
+          <span class="font-medium text-gray-700 dark:text-gray-200">Maharashtra Bhima-Krishna Watersheds</span>
+        </div>
+
+        <div class="flex items-center gap-2 pointer-events-auto ml-auto">
+          <div id="siting-mode-banner" class="hidden px-3 py-1.5 bg-amber-500 text-white text-xs font-bold rounded-xl shadow-lg animate-pulse flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-sm">architecture</span>
+            <span>Siting Mode Active: Click map to calculate suitability</span>
+          </div>
+          <div class="glass-panel px-3.5 py-1.5 rounded-xl text-xs font-mono text-gray-700 dark:text-gray-200 border border-white/30 dark:border-gray-700/80 shadow-lg backdrop-blur-md flex items-center gap-1.5" id="map-live-coordinates">
+            <span class="material-symbols-outlined text-sm text-blue-500">my_location</span>
+            <span>18.3500° N, 74.2000° E</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Left Floating Controls Overlay (Basemap Provider, Layer Controls, Temporal Playback, AI Siting Optimizer) -->
+      <div id="gis-left-panel" class="absolute top-16 left-4 z-20 w-80 max-h-[calc(100vh-6rem)] overflow-y-auto space-y-3 pointer-events-auto transition-all duration-300">
+        
+        <div class="glass-panel p-4 rounded-2xl border border-white/30 dark:border-gray-700/80 shadow-2xl backdrop-blur-md text-xs space-y-3.5 bg-white/90 dark:bg-gray-900/90">
+          
+          <!-- Basemap Selector -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="font-headline font-bold text-sm text-gray-900 dark:text-white flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-base text-blue-600">public</span> Basemap Provider
+              </h4>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-semibold border border-blue-200 dark:border-blue-800">OpenFreeMap API</span>
+            </div>
+            <div class="grid grid-cols-2 gap-1.5">
+              <label class="flex items-center gap-1.5 p-2 rounded-lg border border-blue-300 dark:border-blue-700 bg-blue-50/70 dark:bg-blue-950/50 cursor-pointer hover:bg-blue-100/60 transition">
+                <input type="radio" name="basemap-radio" value="ofm-liberty" checked class="text-blue-600 focus:ring-blue-500">
+                <span class="font-semibold text-blue-900 dark:text-blue-200 text-[11px]">🗺️ OFM Liberty</span>
+              </label>
+              <label class="flex items-center gap-1.5 p-2 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100/70 dark:hover:bg-gray-800 transition">
+                <input type="radio" name="basemap-radio" value="satellite" class="text-blue-600 focus:ring-blue-500">
+                <span class="text-[11px]">🛰️ Satellite</span>
+              </label>
+              <label class="flex items-center gap-1.5 p-2 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100/70 dark:hover:bg-gray-800 transition">
+                <input type="radio" name="basemap-radio" value="ofm-bright" class="text-blue-600 focus:ring-blue-500">
+                <span class="text-[11px]">🎨 OFM Bright</span>
+              </label>
+              <label class="flex items-center gap-1.5 p-2 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100/70 dark:hover:bg-gray-800 transition">
+                <input type="radio" name="basemap-radio" value="ofm-positron" class="text-blue-600 focus:ring-blue-500">
+                <span class="text-[11px]">🌌 OFM Positron</span>
+              </label>
+              <label class="col-span-2 flex items-center gap-1.5 p-2 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100/70 dark:hover:bg-gray-800 transition">
+                <input type="radio" name="basemap-radio" value="topo" class="text-blue-600 focus:ring-blue-500">
+                <span class="text-[11px]">⛰️ Topo Elevation Relief</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Geospatial Layers Toggle -->
+          <div class="pt-3 border-t border-gray-200/60 dark:border-gray-700/60 space-y-2">
+            <h4 class="font-headline font-bold text-sm text-gray-900 dark:text-white mb-2 flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-base text-emerald-600">layers</span> Layer Controls
+            </h4>
+            
+            <label class="flex items-center justify-between cursor-pointer py-0.5">
+              <span class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded bg-blue-500/50 border border-blue-600"></span>
+                <span class="text-[11px]">Watershed Catchments</span>
+              </span>
+              <input type="checkbox" id="toggle-basins" checked class="rounded text-emerald-600 focus:ring-emerald-500">
+            </label>
+
+            <label class="flex items-center justify-between cursor-pointer py-0.5">
+              <span class="flex items-center gap-2">
+                <span class="w-3 h-1 bg-sky-400"></span>
+                <span class="text-[11px]">Drainage Streams (DEM)</span>
+              </span>
+              <input type="checkbox" id="toggle-streams" checked class="rounded text-emerald-600 focus:ring-emerald-500">
+            </label>
+
+            <label class="flex items-center justify-between cursor-pointer py-0.5">
+              <span class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-emerald-800 border border-white"></span>
+                <span class="text-[11px]">Check-Dams & Weirs</span>
+              </span>
+              <input type="checkbox" id="toggle-dams" checked class="rounded text-emerald-600 focus:ring-emerald-500">
+            </label>
+
+            <label class="flex items-center justify-between cursor-pointer py-0.5">
+              <span class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded bg-sky-600 text-white flex items-center justify-center text-[8px]">●</span>
+                <span class="text-[11px]">IoT Telemetry Stations</span>
+              </span>
+              <input type="checkbox" id="toggle-sensors" checked class="rounded text-emerald-600 focus:ring-emerald-500">
+            </label>
+          </div>
+
+          <!-- Temporal Playback Time-Series Slider -->
+          <div class="pt-3 border-t border-gray-200/60 dark:border-gray-700/60 space-y-2">
+            <div class="flex items-center justify-between">
+              <h4 class="font-headline font-bold text-sm text-gray-900 dark:text-white flex items-center gap-1">
+                <span class="material-symbols-outlined text-base text-emerald-600">schedule</span> Temporal Playback
+              </h4>
+              <span class="font-mono text-[10px] text-emerald-600 font-bold" id="temporal-spread-index">0.84</span>
+            </div>
+            
+            <div class="text-[11px] font-semibold text-gray-700 dark:text-gray-200" id="temporal-season-label">
+              October 2025 (Post-Monsoon Storage)
+            </div>
+
+            <input type="range" id="temporal-timeline-slider" min="0" max="4" value="3" step="1" class="w-full accent-emerald-600 cursor-pointer">
+
+            <div class="flex justify-between text-[10px] font-mono text-gray-400">
+              <span>May '25</span>
+              <span>Jul</span>
+              <span>Aug</span>
+              <span class="text-emerald-600 font-bold">Oct</span>
+              <span>Jan '26</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100 dark:border-gray-800 text-[11px]">
+              <div>Soil Moisture: <b id="temporal-moisture-val" class="font-mono text-emerald-600">52%</b></div>
+              <div>NDVI Index: <b id="temporal-ndvi-val" class="font-mono text-blue-600">0.68</b></div>
+            </div>
+          </div>
+
+          <!-- AI Siting Optimizer Tool -->
+          <button id="btn-siting-optimizer" class="w-full py-2.5 px-3 bg-gray-100 dark:bg-gray-800 hover:bg-emerald-600 hover:text-white text-gray-700 dark:text-gray-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-700 shadow-sm transition">
+            <span class="material-symbols-outlined text-sm">architecture</span>
+            <span>AI Check-Dam Siting Optimizer</span>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- Right Floating Telemetry Inspector Panel -->
+      <div class="absolute top-16 right-4 z-20 w-88 lg:w-96 max-h-[calc(100vh-6rem)] overflow-y-auto pointer-events-auto">
+        <div class="glass-panel p-4 rounded-2xl border border-white/30 dark:border-gray-700/80 shadow-2xl backdrop-blur-md bg-white/90 dark:bg-gray-900/90" id="site-inspector-panel">
+          <!-- Dynamically populated by map.js selectCheckDamSite / clearSiteSelection -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 3: FIELD EVIDENCE & AI VERIFICATION   -->
+    <!-- ========================================== -->
+    <section id="view-evidence" class="view-container">
+      <div class="max-w-7xl mx-auto px-4 py-8">
+        
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+          <div class="max-w-2xl">
+            <span class="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest block mb-1">Ground Truth & AI Forensics Portal</span>
+            <h2 class="font-headline text-3xl font-bold text-gray-900 dark:text-white">Field Evidence & AI Verification</h2>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Upload and inspect tamper-proof geo-tagged field photographs. The neural forensics engine checks optical sensor noise, EXIF authenticity, and diffusion anomalies to verify genuine field structures vs AI-generated synthetic images.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btn-open-create-case-study" class="px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-1.5 active:scale-98">
+              <span class="material-symbols-outlined text-base">add_circle</span>
+              <span>+ Create Custom Case Study</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          <!-- Left Column: Camera Viewfinder & AI Scanner -->
+          <div class="lg:col-span-7 space-y-4">
+            <div class="glass-panel p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg">
+              
+              <!-- Viewfinder Header -->
+              <div class="flex items-center justify-between pb-3 mb-3 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-emerald-600 text-lg">camera</span>
+                  <span class="font-mono text-xs font-bold text-gray-800 dark:text-gray-200">INSPECTION CAMERA FEED</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-mono font-bold text-emerald-600" id="ai-confidence-badge">99.4%</span>
+                  <span id="ai-verdict-badge-header" class="text-[10px] bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-2 py-0.5 rounded font-bold border border-emerald-300 dark:border-emerald-800 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-xs">verified</span> AUTHENTIC SENSOR VERIFIED
+                  </span>
+                </div>
+              </div>
+
+              <!-- Main Preview Image with Scanner Laser & Bounding Boxes -->
+              <div class="relative h-80 sm:h-96 rounded-xl overflow-hidden bg-gray-900 border border-gray-300 dark:border-gray-700">
+                <img id="evidence-preview-img" src="" alt="Field evidence preview" class="w-full h-full object-cover"/>
+                
+                <!-- Laser Sweep Animation Line -->
+                <div id="evidence-scanner-laser" class="hidden absolute left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 via-sky-400 to-emerald-400 scanner-laser shadow-[0_0_15px_rgba(16,185,129,0.9)] z-20"></div>
+
+                <!-- Bounding Boxes Layer -->
+                <div id="ai-bounding-boxes-container" class="absolute inset-0 z-10"></div>
+              </div>
+
+              <!-- Forensic Diagnostics Signals Container -->
+              <div id="ai-forensic-signals-list" class="mt-3"></div>
+
+              <!-- Scan Status & Action Buttons -->
+              <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs pt-3 border-t border-gray-200 dark:border-gray-700/70">
+                <span class="text-gray-500 font-mono" id="ai-scan-status-text">Ready for forensic AI inspection</span>
+                <div class="flex flex-wrap items-center gap-2">
+                  <button id="btn-run-ai-scan" class="px-3 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg font-semibold flex items-center gap-1.5 transition">
+                    <span class="material-symbols-outlined text-sm">neurology</span>
+                    <span>Run AI Check</span>
+                  </button>
+                  <button id="btn-test-ai-sample" class="px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-semibold flex items-center gap-1.5 transition" title="Test AI Synthetic Image Detection">
+                    <span class="material-symbols-outlined text-sm">smart_toy</span>
+                    <span>Test AI Sample</span>
+                  </button>
+                  <label class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer flex items-center gap-1.5 transition">
+                    <span class="material-symbols-outlined text-sm">upload_file</span>
+                    <span>Upload Photo</span>
+                    <input type="file" id="evidence-file-input" accept="image/*" class="hidden"/>
+                  </label>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Right Column: EXIF Metadata & Geofence Mini-Map -->
+          <div class="lg:col-span-5 space-y-4">
+            
+            <!-- Sample Evidence Records -->
+            <div class="glass-panel p-4 rounded-2xl border border-gray-200 dark:border-gray-700">
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="font-headline font-bold text-xs uppercase tracking-wider text-gray-500">Case Study Field Records</h4>
+                <button onclick="document.getElementById('btn-open-create-case-study').click()" class="text-xs text-emerald-600 font-bold hover:underline flex items-center gap-0.5">
+                  <span class="material-symbols-outlined text-xs">add</span> New
+                </button>
+              </div>
+              <div id="evidence-presets-list" class="space-y-2 max-h-72 overflow-y-auto pr-1"></div>
+            </div>
+
+            <!-- EXIF Metadata Card -->
+            <div class="glass-panel p-4 rounded-2xl border border-gray-200 dark:border-gray-700 text-xs space-y-2.5">
+              <h4 class="font-headline font-bold text-sm text-gray-900 dark:text-white flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-emerald-600 text-base">fingerprint</span> Cryptographic EXIF Proof
+              </h4>
+
+              <div class="space-y-1.5 font-mono divide-y divide-gray-100 dark:divide-gray-800">
+                <div class="flex justify-between py-1"><span class="text-gray-500">GPS Coordinates:</span> <b id="exif-latlng">-</b></div>
+                <div class="flex justify-between py-1"><span class="text-gray-500">Altitude (MSL):</span> <b id="exif-altitude">-</b></div>
+                <div class="flex justify-between py-1"><span class="text-gray-500">Timestamp:</span> <b id="exif-timestamp">-</b></div>
+                <div class="flex justify-between py-1"><span class="text-gray-500">Capture Device:</span> <b id="exif-device">-</b></div>
+                <div class="flex justify-between py-1"><span class="text-gray-500">Ledger Hash:</span> <b id="exif-hash" class="text-emerald-600">-</b></div>
+              </div>
+            </div>
+
+            <!-- Geofence Mini-Map -->
+            <div class="glass-panel p-4 rounded-2xl border border-gray-200 dark:border-gray-700 text-xs">
+              <h4 class="font-headline font-bold text-sm text-gray-900 dark:text-white mb-2 flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-emerald-600 text-base">pin_drop</span> Geofence Perimeter Match
+              </h4>
+              <div id="evidence-minimap" class="h-36 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700"></div>
+            </div>
+
+            <!-- Submit to Audit Button -->
+            <button id="btn-submit-verification-audit" class="w-full py-3 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center justify-center gap-2">
+              <span class="material-symbols-outlined text-base">verified</span>
+              <span>Generate Audit & Verification Certificate</span>
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 4: EXECUTIVE ANALYTICS & SCORECARDS   -->
+    <!-- ========================================== -->
+    <section id="view-analytics" class="view-container">
+      <div class="max-w-7xl mx-auto px-4 py-8">
+        
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+          <div>
+            <span class="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest block mb-1">Executive Decision Support</span>
+            <h2 class="font-headline text-3xl font-bold text-gray-900 dark:text-white">District Analytics & Audit Scorecards</h2>
+          </div>
+          <div class="flex items-center gap-2">
+            <select id="district-filter-select" class="text-xs py-2 px-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200">
+              <option value="All">All Districts (Maharashtra)</option>
+              <option value="Pune">Pune</option>
+              <option value="Satara">Satara</option>
+              <option value="Ahmednagar">Ahmednagar</option>
+              <option value="Solapur">Solapur</option>
+              <option value="Nashik">Nashik</option>
+            </select>
+            <button id="btn-export-audit-csv" class="px-3.5 py-2 bg-emerald-800 hover:bg-emerald-900 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+              <span class="material-symbols-outlined text-sm">download</span> Export CSV
+            </button>
+          </div>
+        </div>
+
+        <!-- KPI Cards Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div class="glass-panel p-5 rounded-xl border border-gray-200 dark:border-gray-700">
+            <span class="text-xs text-gray-500 font-medium">Total Watersheds Managed</span>
+            <div class="font-headline text-3xl font-bold text-emerald-800 dark:text-emerald-400 mt-1">1,420</div>
+            <span class="text-xs text-emerald-600 font-semibold mt-1 block">&uarr; 18.2% YoY Expansion</span>
+          </div>
+          <div class="glass-panel p-5 rounded-xl border border-gray-200 dark:border-gray-700">
+            <span class="text-xs text-gray-500 font-medium">Total Monitored Area</span>
+            <div class="font-headline text-3xl font-bold text-blue-700 dark:text-blue-400 mt-1">45.0 Mha</div>
+            <span class="text-xs text-blue-600 font-semibold mt-1 block">5-day Satellite Revisit</span>
+          </div>
+          <div class="glass-panel p-5 rounded-xl border border-gray-200 dark:border-gray-700">
+            <span class="text-xs text-gray-500 font-medium">Avg Water Storage Increase</span>
+            <div class="font-headline text-3xl font-bold text-sky-600 dark:text-sky-400 mt-1">+312%</div>
+            <span class="text-xs text-sky-600 font-semibold mt-1 block">Post-Monsoon Peak</span>
+          </div>
+          <div class="glass-panel p-5 rounded-xl border border-gray-200 dark:border-gray-700">
+            <span class="text-xs text-gray-500 font-medium">Government Funds Deployed</span>
+            <div class="font-headline text-3xl font-bold text-gray-900 dark:text-white mt-1">₹440.5 Cr</div>
+            <span class="text-xs text-emerald-600 font-semibold mt-1 block">91.4% Milestone Verified</span>
+          </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          
+          <!-- NDVI Recovery Trend Chart -->
+          <div class="glass-panel p-5 rounded-2xl border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h4 class="font-headline font-bold text-base text-gray-900 dark:text-white">Multi-Year NDVI Vegetation Recovery</h4>
+                <p class="text-xs text-gray-500">Spectral comparison: Intervened catchments vs Unmanaged control baseline</p>
+              </div>
+              <span class="material-symbols-outlined text-emerald-600">eco</span>
+            </div>
+            <div class="h-64">
+              <canvas id="chart-ndvi-trend"></canvas>
+            </div>
+          </div>
+
+          <!-- District Target vs Actual Bar Chart -->
+          <div class="glass-panel p-5 rounded-2xl border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h4 class="font-headline font-bold text-base text-gray-900 dark:text-white">Water Storage Gain (%) by District</h4>
+                <p class="text-xs text-gray-500">Actual achievement vs State Government Target</p>
+              </div>
+              <span class="material-symbols-outlined text-blue-600">bar_chart</span>
+            </div>
+            <div class="h-64">
+              <canvas id="chart-district-comparison"></canvas>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Detailed Scorecard Table -->
+        <div class="glass-panel rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+          <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+            <h4 class="font-headline font-bold text-sm text-gray-900 dark:text-white">District-Wise Physical & Financial Progress</h4>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-gray-50 dark:bg-gray-800/60 text-gray-500 uppercase font-mono">
+                <tr>
+                  <th class="py-3 px-4">District</th>
+                  <th class="py-3 px-4">Watersheds</th>
+                  <th class="py-3 px-4">Area (Mha)</th>
+                  <th class="py-3 px-4">Storage Gain</th>
+                  <th class="py-3 px-4">Accuracy</th>
+                  <th class="py-3 px-4">Funds (Cr)</th>
+                  <th class="py-3 px-4">Milestone %</th>
+                </tr>
+              </thead>
+              <tbody id="district-scorecard-tbody">
+                <!-- Populated dynamically by analytics.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================================================== -->
+    <!-- VIEW 5: RECENT CASE STUDIES & SENSOR TELEMETRY       -->
+    <!-- ==================================================== -->
+    <section id="view-telemetry" class="view-container">
+      <div class="max-w-7xl mx-auto px-4 py-8">
+        
+        <!-- Header & Action Row -->
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+          <div>
+            <span class="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest block mb-1">Ground Truth Repository & Telemetry</span>
+            <h2 class="font-headline text-3xl font-bold text-gray-900 dark:text-white">Recent Case Studies & Field Ground Truths</h2>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Cross-validated case studies from field officers, community water user associations, and live IoT sensor telemetry arrays.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button onclick="window.navigateToView('view-evidence')" class="px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5 active:scale-98">
+              <span class="material-symbols-outlined text-base">add_photo_alternate</span>
+              <span>+ Add / Scan Field Evidence</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Tabs & Stats Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-6 p-2 bg-gray-100 dark:bg-gray-800/80 rounded-2xl border border-gray-200 dark:border-gray-700">
+          <div class="flex flex-wrap items-center gap-1.5 text-xs font-semibold">
+            <button data-cs-filter="all" class="px-3.5 py-1.5 rounded-xl bg-emerald-700 text-white shadow transition">
+              All Case Studies
+            </button>
+            <button data-cs-filter="authentic" class="px-3.5 py-1.5 rounded-xl bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+              🛡️ Authentic Verified
+            </button>
+            <button data-cs-filter="ai-flagged" class="px-3.5 py-1.5 rounded-xl bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+              ⚠️ AI-Generated Flagged
+            </button>
+            <button data-cs-filter="custom" class="px-3.5 py-1.5 rounded-xl bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+              ✨ User Created
+            </button>
+          </div>
+          <div class="text-xs font-mono text-gray-600 dark:text-gray-400 px-3">
+            <span id="case-studies-count-badge" class="bg-white dark:bg-gray-900 px-2.5 py-1 rounded-lg border border-gray-200 dark:border-gray-700 font-bold text-emerald-600">4 Case Studies</span>
+          </div>
+        </div>
+
+        <!-- Case Studies Cards Grid -->
+        <div id="case-studies-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-14">
+          <!-- Dynamically populated by telemetry.js renderRecentCaseStudies -->
+        </div>
+
+        <!-- Section 2: Live IoT Telemetry Stations -->
+        <div class="pt-8 border-t border-gray-200 dark:border-gray-800 mb-6">
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div>
+              <span class="text-xs font-mono font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest block mb-1">Live Sensor Telemetry Array</span>
+              <h3 class="font-headline text-2xl font-bold text-gray-900 dark:text-white">Real-Time Sensor Stations & Piezometers</h3>
+              <p class="text-xs text-gray-500 mt-1">Direct feeds from automated piezometers, soil moisture profiles, and acoustic rain gauges across pilot watersheds.</p>
+            </div>
+            <div class="flex items-center gap-2 text-xs font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800/60">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>All 3 IoT Stations Active &middot; 4s ping</span>
+            </div>
+          </div>
+
+          <div id="telemetry-stations-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Dynamically populated by telemetry.js renderTelemetryStations -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 6: ABOUT US & PLATFORM VISION         -->
+    <!-- ========================================== -->
+    <section id="view-about" class="view-container">
+      <div class="max-w-5xl mx-auto px-4 py-12 space-y-16">
+        
+        <!-- Hero Title Banner -->
+        <div class="text-center max-w-3xl mx-auto space-y-4">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-200 text-xs font-mono shadow-xs">
+            <span class="material-symbols-outlined text-sm text-blue-600">lightbulb</span>
+            The Story & Mission Behind JalDrishti
+          </div>
+          <h1 class="font-headline text-4xl sm:text-5xl font-bold tracking-tight text-gray-900 dark:text-white leading-tight">
+            Geospatial Intelligence for Every Drop of Water.
+          </h1>
+          <p class="text-base sm:text-lg text-gray-600 dark:text-gray-300 leading-relaxed font-normal">
+            We are engineering students in <strong class="text-gray-900 dark:text-white">Artificial Intelligence & Machine Learning (AIML)</strong> building technology that connects space satellites with ground field reality to regenerate drought-affected rural India.
+          </p>
+        </div>
+
+        <!-- The "In Simple Words" Explainer Card -->
+        <div class="glass-panel p-6 sm:p-8 rounded-2xl border border-blue-200/80 dark:border-blue-900/60 shadow-lg relative overflow-hidden">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md">
+              <span class="material-symbols-outlined text-2xl">auto_stories</span>
+            </div>
+            <div>
+              <h2 class="font-headline text-xl font-bold text-gray-900 dark:text-white">JalDrishti Explained in Simple Words</h2>
+              <p class="text-xs text-blue-600 dark:text-blue-400 font-medium">No technical jargon. Just clear concepts.</p>
+            </div>
+          </div>
+          
+          <div class="space-y-4 text-sm sm:text-base text-gray-700 dark:text-gray-200 leading-relaxed">
+            <p>
+              Imagine if a giant digital camera in space (a satellite) could watch every river, seasonal creek, and farm in your district. At the same time, a government officer or engineer on the ground takes a photo of a newly built <strong>check-dam</strong> or <strong>percolation pond</strong> on their smartphone.
+            </p>
+            <p class="bg-blue-50/80 dark:bg-blue-950/40 p-4 rounded-xl border border-blue-100 dark:border-blue-900/40 text-blue-900 dark:text-blue-200 font-medium">
+              👉 <strong>JalDrishti is the smart AI bridge between the satellite in the sky and the camera on the ground.</strong> It verifies that the water structure was genuinely built at the exact location, checks if it is choked by silt or functioning well, and proves via satellite whether real water is being stored and whether nearby agricultural land has turned greener over time.
+            </p>
+          </div>
+        </div>
+
+        <!-- The 3 Pillars Architecture -->
+        <div>
+          <div class="text-center max-w-xl mx-auto mb-8">
+            <h3 class="font-headline text-2xl font-bold text-gray-900 dark:text-white">How the System Works</h3>
+            <p class="text-xs text-gray-500 mt-1">Three complementary layers working together in harmony.</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Pillar 1 -->
+            <div class="glass-panel p-6 rounded-xl border border-gray-200 dark:border-gray-700 text-left space-y-3">
+              <div class="w-12 h-12 rounded-lg bg-sky-100 dark:bg-sky-950 text-sky-600 flex items-center justify-center">
+                <span class="material-symbols-outlined text-2xl">satellite_alt</span>
+              </div>
+              <h4 class="font-headline font-bold text-base text-gray-900 dark:text-white">1. The Sky (Satellites)</h4>
+              <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                Sentinel-2 and ISRO Bhuvan satellites scan the watershed every 5 days. They capture invisible infrared light bands to measure <strong>NDVI</strong> (vegetation health) and <strong>NDWI</strong> (surface water spread) across millions of hectares.
+              </p>
+            </div>
+
+            <!-- Pillar 2 -->
+            <div class="glass-panel p-6 rounded-xl border border-gray-200 dark:border-gray-700 text-left space-y-3">
+              <div class="w-12 h-12 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center">
+                <span class="material-symbols-outlined text-2xl">smartphone</span>
+              </div>
+              <h4 class="font-headline font-bold text-base text-gray-900 dark:text-white">2. The Ground (Mobile App)</h4>
+              <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                Field officers visit construction sites and snap photos. The mobile app automatically watermarks unforgeable GPS latitude/longitude, altitude, and timestamp metadata directly into the image file.
+              </p>
+            </div>
+
+            <!-- Pillar 3 -->
+            <div class="glass-panel p-6 rounded-xl border border-gray-200 dark:border-gray-700 text-left space-y-3">
+              <div class="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-600 flex items-center justify-center">
+                <span class="material-symbols-outlined text-2xl">neurology</span>
+              </div>
+              <h4 class="font-headline font-bold text-base text-gray-900 dark:text-white">3. The AI Brain (The Engine)</h4>
+              <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                Our computer vision models classify the structure, estimate siltation depth, and cross-match with satellite time-series data to calculate an objective <strong>Watershed Impact Score (e.g. 78/100)</strong>.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- The 6-Step Workflow Banner -->
+        <div class="glass-panel p-6 rounded-2xl border border-gray-200 dark:border-gray-700">
+          <span class="text-xs font-mono font-bold text-blue-600 uppercase tracking-widest block mb-2 text-center">The One-Line Working Principle</span>
+          <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs font-mono font-semibold text-gray-800 dark:text-gray-200 py-2">
+            <span class="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800">📸 Field Photo</span>
+            <span>&rarr;</span>
+            <span class="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800">📍 GPS Location</span>
+            <span>&rarr;</span>
+            <span class="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800">🛰️ Satellite Data</span>
+            <span>&rarr;</span>
+            <span class="px-3 py-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">🧠 AI Validation</span>
+            <span>&rarr;</span>
+            <span class="px-3 py-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">📊 Impact Score (0–100)</span>
+            <span>&rarr;</span>
+            <span class="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800">✅ Fund Release</span>
+          </div>
+        </div>
+
+        <!-- What We Are Aiming to Achieve -->
+        <div class="space-y-6">
+          <div class="text-center max-w-xl mx-auto">
+            <h3 class="font-headline text-2xl font-bold text-gray-900 dark:text-white">What We Are Aiming to Achieve</h3>
+            <p class="text-xs text-gray-500 mt-1">Four tangible outcomes for rural India's water security.</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+            <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/60 space-y-2">
+              <div class="flex items-center gap-2 text-blue-600 font-bold">
+                <span class="material-symbols-outlined text-xl">gavel</span>
+                <h4>1. Stop 'Ghost' Projects & Ensure 100% Transparency</h4>
+              </div>
+              <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                In traditional paper-based systems, funds can be disbursed for structures that were never actually built or built in the wrong spot. JalDrishti makes project verification cryptographically secure and unforgeable.
+              </p>
+            </div>
+
+            <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/60 space-y-2">
+              <div class="flex items-center gap-2 text-emerald-600 font-bold">
+                <span class="material-symbols-outlined text-xl">warning</span>
+                <h4>2. Detect Siltation Before Dams Become Useless</h4>
+              </div>
+              <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                When soil washes into check-dams, mud fills up the reservoir and the dam stops holding water. Our platform alerts district engineers months before the monsoon so desiltation drives can be carried out.
+              </p>
+            </div>
+
+            <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/60 space-y-2">
+              <div class="flex items-center gap-2 text-amber-600 font-bold">
+                <span class="material-symbols-outlined text-xl">architecture</span>
+                <h4>3. Science-Backed Dam Siting with AI</h4>
+              </div>
+              <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                Instead of constructing dams based on guesswork or political convenience, our <em>Check-Dam Siting Optimizer</em> calculates terrain slopes and rainfall runoff patterns to place dams where they trap maximum water.
+              </p>
+            </div>
+
+            <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/60 space-y-2">
+              <div class="flex items-center gap-2 text-sky-600 font-bold">
+                <span class="material-symbols-outlined text-xl">water</span>
+                <h4>4. Recharging Groundwater for Marginal Farmers</h4>
+              </div>
+              <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                The ultimate metric of success isn't concrete walls—it's whether farmers' borewells hold water during the dry months of April and May, allowing a second winter crop and preventing farmer distress.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Essential Fundamentals (Narrative Format) -->
+        <div class="glass-panel p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-6">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-600 flex items-center justify-center">
+              <span class="material-symbols-outlined text-2xl">menu_book</span>
+            </div>
+            <div>
+              <h3 class="font-headline text-xl font-bold text-gray-900 dark:text-white">Core Fundamentals & Ground Reality</h3>
+              <p class="text-xs text-gray-500">Key scientific and operational concepts behind the platform.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+            <!-- Concept 1 -->
+            <div class="p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-white/70 dark:bg-gray-800/40 space-y-2">
+              <div class="flex items-center gap-2 text-blue-700 dark:text-blue-300 font-bold text-sm">
+                <span class="material-symbols-outlined text-base">terrain</span>
+                <h4>The Watershed as a Natural Basin</h4>
+              </div>
+              <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                A watershed is a natural geographical bowl. Whenever rain falls across ridges and hillsides, water travels through streams into a central river or underground aquifer. Managing this basin means trapping rainfall at the upper ridges before it rushes away and strips fertile soil.
+              </p>
+            </div>
+
+            <!-- Concept 2 -->
+            <div class="p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-white/70 dark:bg-gray-800/40 space-y-2">
+              <div class="flex items-center gap-2 text-emerald-700 dark:text-emerald-300 font-bold text-sm">
+                <span class="material-symbols-outlined text-base">water_lux</span>
+                <h4>The Function of Small Check-Dams</h4>
+              </div>
+              <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                Check-dams are small masonry or rock structures erected across seasonal torrents. Instead of halting a river forever, they decelerate swift monsoon runoff, allowing sediment to settle and giving water ample time to percolate deep underground to replenish irrigation wells.
+              </p>
+            </div>
+
+            <!-- Concept 3 -->
+            <div class="p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-white/70 dark:bg-gray-800/40 space-y-2">
+              <div class="flex items-center gap-2 text-purple-700 dark:text-purple-300 font-bold text-sm">
+                <span class="material-symbols-outlined text-base">verified_user</span>
+                <h4>Dual-Layer Tamper Prevention</h4>
+              </div>
+              <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                Field photos cannot be faked or reused from the internet. The system extracts hardware-level coordinates, azimuth angle, and timestamp from the device camera, then cross-verifies against orbital satellite radar passes to confirm physical water storage in real life.
+              </p>
+            </div>
+
+            <!-- Concept 4 -->
+            <div class="p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-white/70 dark:bg-gray-800/40 space-y-2">
+              <div class="flex items-center gap-2 text-amber-700 dark:text-amber-300 font-bold text-sm">
+                <span class="material-symbols-outlined text-base">speed</span>
+                <h4>The Composite Watershed Impact Score</h4>
+              </div>
+              <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                Rather than tracking bureaucratic paperwork, success is evaluated by an algorithmic 0–100 index. This combines satellite vegetation gains (+18%), surface water retention (+24%), soil erosion arrest (-12%), and verified masonry stability into one transparent score.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Back to Platform Call to Action -->
+        <div class="text-center pt-4">
+          <a href="#view-map" data-view-target="view-map" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs shadow-md transition active:scale-98">
+            <span class="material-symbols-outlined text-sm">explore</span>
+            <span>Explore the Interactive Watershed Map</span>
+          </a>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Create Custom Case Study Modal -->
+  <div id="create-case-study-modal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass-panel max-w-2xl w-full rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-2xl p-6 my-8">
+      
+      <div class="flex items-center justify-between pb-4 mb-4 border-b border-gray-200 dark:border-gray-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-2xl">add_photo_alternate</span>
+          </div>
+          <div>
+            <h3 class="font-headline font-bold text-lg text-gray-900 dark:text-white">Create Custom Watershed Case Study</h3>
+            <p class="text-xs text-gray-500">Submit field intervention evidence with automatic AI forensic & EXIF validation.</p>
+          </div>
+        </div>
+        <button id="btn-close-case-study-modal" class="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
+
+      <form id="form-create-case-study" class="space-y-4 text-xs">
+        
+        <!-- Title, Village & Watershed Basin -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-gray-700 dark:text-gray-300 font-bold mb-1">Case Study Title *</label>
+            <input type="text" id="cs-input-title" required placeholder="e.g., Purandar Ridge Masonry Rejuvenation" class="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+          </div>
+
+          <div>
+            <label class="block text-gray-700 dark:text-gray-300 font-bold mb-1">Village / Hamlet Name *</label>
+            <input type="text" id="cs-input-village" required placeholder="e.g., Saswad Foothills Hamlet" value="Saswad Foothills Hamlet" class="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+          </div>
+
+          <div>
+            <label class="block text-gray-700 dark:text-gray-300 font-bold mb-1">Watershed Basin *</label>
+            <select id="cs-input-basin" class="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="WB-PUNE-01">Upper Bhima Micro-Watershed (Pune)</option>
+              <option value="WB-SATARA-02">Krishna Tributary Catchment #4 (Satara)</option>
+              <option value="WB-AHMED-03">Mula-Pravara Sub-Basin C (Ahmednagar)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Structure Type & Verified Officer -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-gray-700 dark:text-gray-300 font-bold mb-1">Structure Type *</label>
+            <select id="cs-input-type" class="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="Masonry Check Dam">Masonry Check Dam</option>
+              <option value="Percolation Tank">Percolation Tank</option>
+              <option value="Wire-Mesh Gabion">Wire-Mesh Gabion Structure</option>
+              <option value="Continuous Contour Trench (CCT)">Continuous Contour Trench (CCT)</option>
+              <option value="Farm Pond (Shet Tale)">Farm Pond (Shet Tale)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-gray-700 dark:text-gray-300 font-bold mb-1">Inspecting Officer Name *</label>
+            <input type="text" id="cs-input-officer" required placeholder="e.g., Er. Sachin Kulkarni (Zilla Parishad)" class="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+          </div>
+        </div>
+
+        <!-- Coordinates & Metrics -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-gray-700 dark:text-gray-300 font-bold mb-1">GPS Latitude (°N)</label>
+            <input type="number" id="cs-input-lat" step="0.0001" value="18.4950" class="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+          </div>
+
+          <div>
+            <label class="block text-gray-700 dark:text-gray-300 font-bold mb-1">GPS Longitude (°E)</label>
+            <input type="number" id="cs-input-lng" step="0.0001" value="73.9550" class="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+          </div>
+
+          <div>
+            <label class="block text-gray-700 dark:text-gray-300 font-bold mb-1">Storage Gain (% increase)</label>
+            <input type="number" id="cs-input-storage-gain" value="285" class="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-gray-700 dark:text-gray-300 font-bold mb-1">Water Capacity (Liters)</label>
+            <input type="number" id="cs-input-capacity" value="16500000" class="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+          </div>
+
+          <div>
+            <label class="block text-gray-700 dark:text-gray-300 font-bold mb-1">Siltation Level (%)</label>
+            <input type="number" id="cs-input-siltation" value="12" class="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+          </div>
+        </div>
+
+        <!-- Field Photo Upload with AI Check Notice -->
+        <div class="p-3.5 rounded-xl border border-dashed border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20">
+          <label class="block text-gray-800 dark:text-gray-200 font-bold mb-1 flex items-center justify-between">
+            <span class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-emerald-600 text-base">cloud_upload</span>
+              Upload Field Photo (AI Forensics Authenticity Scan applied)
+            </span>
+            <span class="text-[10px] text-emerald-700 dark:text-emerald-400 font-mono font-bold">AI SCAN READY</span>
+          </label>
+          <input type="file" id="cs-input-photo" accept="image/*" class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 file:cursor-pointer"/>
+          <p class="text-[11px] text-gray-500 mt-1">Our neural forensics engine inspects the photo for camera CMOS Bayer noise vs AI diffusion artifacts.</p>
+        </div>
+
+        <!-- Notes -->
+        <div>
+          <label class="block text-gray-700 dark:text-gray-300 font-bold mb-1">Field Observations & Impact Summary</label>
+          <textarea id="cs-input-notes" rows="2" placeholder="Describe the physical restoration, farmer beneficiaries, and post-monsoon storage impact..." class="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex items-center justify-end gap-3 pt-3 border-t border-gray-200 dark:border-gray-800">
+          <button type="button" onclick="document.getElementById('btn-close-case-study-modal').click()" class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-700 dark:text-gray-300 font-bold hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold shadow-md transition flex items-center gap-1.5 active:scale-98">
+            <span class="material-symbols-outlined text-base">verified</span>
+            <span>Run AI Forensics & Publish Case Study</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- Case Study Place Dossier Modal Container -->
+  <div id="case-study-dossier-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="max-w-4xl w-full" id="case-study-dossier-content"></div>
+  </div>
+
+  <!-- Verification Audit Certificate Modal -->
+  <div id="audit-certificate-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="max-w-lg w-full" id="certificate-content"></div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 py-8 text-xs text-gray-500 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-blue-600 text-lg">water_drop</span>
+        <span class="font-headline font-bold text-gray-800 dark:text-gray-200">JalDrishti &copy; 2026</span>
+        <span>&middot; Water Resource Intelligence Platform</span>
+      </div>
+      <div class="flex items-center gap-6">
+        <a href="#view-home" data-view-target="view-home" class="hover:text-gray-900 dark:hover:text-white">Home</a>
+        <a href="#view-map" data-view-target="view-map" class="hover:text-gray-900 dark:hover:text-white">GIS Map</a>
+        <a href="#view-evidence" data-view-target="view-evidence" class="hover:text-gray-900 dark:hover:text-white">Evidence</a>
+        <a href="#view-analytics" data-view-target="view-analytics" class="hover:text-gray-900 dark:hover:text-white">Analytics</a>
+        <a href="#view-telemetry" data-view-target="view-telemetry" class="hover:text-gray-900 dark:hover:text-white">Recent Case Studies</a>
+        <a href="#view-about" data-view-target="view-about" class="hover:text-gray-900 dark:hover:text-white font-medium text-blue-600 dark:text-blue-400">About Us</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Main ES Module Entry Point -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
