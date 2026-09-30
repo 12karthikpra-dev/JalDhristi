@@ -1,7 +1,6 @@
 # 🌊 JalDrishti (जलदृष्टि)
 ### *AI-Powered Geospatial Watershed Intelligence & Ground Truth Verification Platform*
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/12karthikpra-dev/JalDhristi)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Leaflet](https://img.shields.io/badge/GIS-Leaflet.js_v1.9-green.svg)](https://leafletjs.com/)
 [![OpenFreeMap](https://img.shields.io/badge/Vector_Tiles-OpenFreeMap.org-blueviolet.svg)](https://openfreemap.org/)
@@ -110,8 +109,8 @@ Scientific & Algorithmic Modules
 ## 🚀 Quickstart & Local Setup
 
 ### Prerequisites
-* Any standard browser (Chrome, Firefox, Safari, Edge)
-* Python 3.x or Node.js (for local HTTP server)
+* Any modern browser (Chrome, Firefox, Safari, Edge)
+* Python 3.x or Node.js (for running a local HTTP server)
 
 ### 1. Clone the Repository
 ```bash
@@ -130,20 +129,6 @@ npx serve .
 
 ### 3. Open in Browser
 Visit `http://localhost:8080` in your web browser.
-
----
-
-## ☁️ 1-Click Deployment on Render
-
-This repository includes a [`render.yaml`](render.yaml) blueprint for instant, zero-configuration deployment on Render Static Sites.
-
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/12karthikpra-dev/JalDhristi)
-
-### Manual Dashboard Steps:
-1. Log in to [Render.com](https://dashboard.render.com/) $\rightarrow$ Click **New +** $\rightarrow$ **Static Site**.
-2. Connect `https://github.com/12karthikpra-dev/JalDhristi`.
-3. Set **Publish Directory** to `.` *(single dot)*.
-4. Click **Create Static Site** — your app is live on a free `.onrender.com` HTTPS URL in ~10 seconds!
 
 ---
 
